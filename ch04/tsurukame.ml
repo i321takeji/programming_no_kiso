@@ -29,11 +29,29 @@ let test_tk2 = tsurukame_no_ashi 5 7 = 38
 let test_tk3 =  tsurukame_no_ashi 10 20 = 100
 
 (* exer 4.8 *)
-(* 目的：鶴と亀の数の合計 tk と足の合計 l を与えたら，亀の数を計算する *)
-(* tsurukame : int -> int -> int *)
-let tsurukame tk l = (l - 2 * tk) / 2
+(* 目的：鶴と亀の数の合計 tk と足の合計 l を与えたら，【亀の数】を計算する *)
+(* tsurukame_k : int -> int -> int *)
+let tsurukame_k tk l = (l - 2 * tk) / 2
 
 (* テスト *)
-let test_tk1 = tsurukame 2 6 = 1
-let test_tk2 = tsurukame 5 16 = 3
-let test_tk3 =  tsurukame 10 32 = 6
+let test_tk_k1 = tsurukame_k 2 6 = 1
+let test_tk_k2 = tsurukame_k 5 16 = 3
+let test_tk_k3 =  tsurukame_k 10 32 = 6
+
+(* exer 4.8 *)
+(* 目的：鶴と亀の数の合計 tk と足の合計 l を与えたら，【鶴の数】を計算する *)
+(* tsurukame_t : int -> int -> int *)
+let tsurukame_t tk l = (4 * tk - l) / 2
+
+let o_test1 = tsurukame_t 3 10 = 1
+let o_test2 = tsurukame_t 6 18 = 3
+let y_test1 = tsurukame_t 0 0 = 0
+let y_test2 = tsurukame_t 1 4 = 0
+let y_test3 = tsurukame_t 1 2 = 1
+let y_test4 = tsurukame_t 2 8 = 0
+let y_test5 = tsurukame_t 2 6 = 1
+let y_test6 = tsurukame_t 2 4 = 2
+let y_test7  = tsurukame_t 3 12 = 0
+let y_test8  = tsurukame_t 3 10 = 1
+let y_test9  = tsurukame_t 3 8  = 2
+let y_test10 = tsurukame_t 3 6  = 3
