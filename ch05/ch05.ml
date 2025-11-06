@@ -94,7 +94,6 @@ let seiza_test22 = seiza 2 18 = "水瓶座"
 let seiza_test23 = seiza 2 19 = "魚座"
 let seiza_test24 = seiza 3 20 = "魚座"
 
-
 (*
 星座    誕生日の範囲
 牡羊座（おひつじ座）    3月21日 ～ 4月19日
