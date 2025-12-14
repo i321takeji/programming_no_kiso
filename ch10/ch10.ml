@@ -1,0 +1,172 @@
+(* sec10.1 *)
+
+(* 目的：受け取った lst の要素それぞれの先頭に n をくっつける *)
+(* add_to_each : int -> int list list -> int list list *)
+let rec add_to_each n lst =
+  match lst with
+  | [] -> []
+  | first :: rest -> (n :: first) :: add_to_each n rest
+
+(* テスト *)
+let test1 = add_to_each 1 [] = []
+
+let test2 = add_to_each 1 [[2]] = [[1; 2]]
+
+let test3 = add_to_each 1 [[2]; [2; 3]] = [[1; 2]; [1; 2; 3]]
+
+let test4 =
+  add_to_each 1 [[2]; [2; 3]; [2; 3; 4]] = [[1; 2]; [1; 2; 3]; [1; 2; 3; 4]]
+
+(* 目的：受け取った lst の接頭語のリストを求める *)
+(* prefix : int list -> int list list *)
+let rec prefix lst =
+  match lst with
+  | [] -> []
+  | first :: rest -> [first] :: add_to_each first (prefix rest)
+
+let test5 = prefix [] = []
+
+let test6 = prefix [1] = [[1]]
+
+let test7 = prefix [1; 2] = [[1]; [1; 2]]
+
+let test8 = prefix [1; 2; 3; 4] = [[1]; [1; 2]; [1; 2; 3]; [1; 2; 3; 4]]
+
+(* exer10.1 *)
+
+(* 目的：昇順の整数リスト lst と整数 n を受け取り，lst の昇順となる位置に n を挿入したリストを返す *)
+(* insert : int list -> int -> int list *)
+let rec insert lst n =
+  match lst with
+  | [] -> [n]
+  | first :: rest -> if first < n then first :: insert rest n else n :: lst
+
+(* テスト *)
+let test_insert1 = insert [] 3 = [3]
+
+let test_insert2 = insert [1; 3; 4] 2 = [1; 2; 3; 4]
+
+let test_insert3 = insert [1; 2; 4] 5 = [1; 2; 4; 5]
+
+let test_insert4 = insert [1; 3; 5] 0 = [0; 1; 3; 5]
+
+let test_insert5 = insert [1; 1; 3] 1 = [1; 1; 1; 3]
+
+(* exer10.2 *)
+
+(* 目的：整数のリストを受け取ったら，それを昇順に整列したリストを返す関数 *)
+(* ins_sort : int list -> int list *)
+let rec ins_sort lst =
+  match lst with [] -> [] | first :: rest -> insert (ins_sort rest) first
+
+let test_ins_sort1 = ins_sort [] = []
+
+let test_ins_sort2 = ins_sort [5] = [5]
+
+let test_ins_sort3 = ins_sort [1; 2; 3] = [1; 2; 3]
+
+let test_ins_sort4 = ins_sort [4; 3; 2; 1] = [1; 2; 3; 4]
+
+let test_ins_sort5 = ins_sort [3; 3; 3; 1] = [1; 3; 3; 3]
+
+(* exer10.3 *)
+type gakusei_t =
+  {namae: string (* 名前 *); tensuu: int (* 点数 *); seiseki: string (* 成績 *)}
+
+(* テスト用データ *)
+let g1 = {namae= "taro"; tensuu= 70; seiseki= "B"}
+
+let g2 = {namae= "hanako"; tensuu= 90; seiseki= "A"}
+
+let g3 = {namae= "jiro"; tensuu= 60; seiseki= "C"}
+
+let g4 = {namae= "yuki"; tensuu= 70; seiseki= "B"}
+
+(* 目的：gakusei_t の tensuu の昇順である gakusti_t 型のリスト lst と gakusei_t の値を受け取り，
+         lst の tensuu の昇順となる位置に gakusei_t を挿入したリストを返す *)
+(* gakusei_insert : gakusei_t list -> gakusei_t -> gakusei_t list *)
+let rec gakusei_insert lst gakusei =
+  match lst with
+  | [] -> [gakusei]
+  | ({tensuu} as first) :: rest ->
+      if tensuu < gakusei.tensuu then first :: gakusei_insert rest gakusei
+      else gakusei :: lst
+
+let test_gakusei_insert1 = gakusei_insert [] g1 = [g1]
+
+let test_gakusei_insert2 = gakusei_insert [g1] g2 = [g1; g2]
+
+let test_gakusei_insert3 = gakusei_insert [g3; g1] g2 = [g3; g1; g2]
+
+(* 目的：gakusei_t 型のリストを受け取ったら，それを tensuu フィールドの順に整列したリストを返す *)
+(* gakusei_sort : gakusei_t list -> gakusei_t list *)
+let rec gakusei_sort lst =
+  match lst with
+  | [] -> []
+  | first :: rest -> gakusei_insert (gakusei_sort rest) first
+
+(* テスト *)
+let test_gakusei_sort1 = gakusei_sort [] = []
+
+let test_gakusei_sort2 = gakusei_sort [g1] = [g1]
+
+let test_gakusei_sort3 = gakusei_sort [g1; g2; g3] = [g3; g1; g2]
+
+let test_gakusei_sort4 = gakusei_sort [g2; g1; g3] = [g3; g1; g2]
+
+let test_gakusei_sort5 = gakusei_sort [g1; g4; g3] = [g3; g1; g4]
+
+(* exer10.4 *)
+type person_t =
+  { name: string
+  ; height: float
+  ; weight: float
+  ; birth: int * int
+  ; blood: string }
+
+(* テスト用データ *)
+let p1 =
+  {name= "sato"; height= 170.0; weight= 60.0; birth= (1, 1); blood= "A"}
+
+let p2 = {name= "abe"; height= 165.0; weight= 55.0; birth= (2, 2); blood= "B"}
+
+let p3 =
+  {name= "yamada"; height= 180.0; weight= 70.0; birth= (3, 3); blood= "O"}
+
+let p4 =
+  {name= "sato"; height= 172.0; weight= 62.0; birth= (4, 4); blood= "AB"}
+
+(* 目的：person_t の name の昇順である person_t 型のリスト lst と person_t の値を受け取り，
+         lst の name の昇順となる位置に person_t を挿入したリストを返す *)
+(* person_insert : person_t list -> person_t -> person_t list *)
+let rec person_insert lst person =
+  match lst with
+  | [] -> [person]
+  | ({name} as first) :: rest ->
+      if name < person.name then first :: person_insert rest person
+      else person :: lst
+
+(* テスト *)
+let test_person_insert1 = person_insert [] p1 = [p1]
+
+let test_person_insert2 = person_insert [p1] p2 = [p2; p1]
+
+let test_person_insert3 = person_insert [p2; p1] p3 = [p2; p1; p3]
+
+(* 目的：person_t 型のリストを受け取ったら，それを名前の順に整列したリストを返す *)
+(* person_sort : person_t list -> person_t list *)
+let rec person_sort lst =
+  match lst with
+  | [] -> []
+  | first :: rest -> person_insert (person_sort rest) first
+
+(* テスト *)
+let test_person_sort1 = person_sort [] = []
+
+let test_person_sort2 = person_sort [p1] = [p1]
+
+let test_person_sort3 = person_sort [p1; p2; p3] = [p2; p1; p3]
+
+let test_person_sort4 = person_sort [p3; p1; p2] = [p2; p1; p3]
+
+let test_person_sort5 = person_sort [p1; p4; p2] = [p2; p1; p4]
