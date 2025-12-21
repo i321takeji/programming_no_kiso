@@ -39,7 +39,11 @@ let test8 = prefix [1; 2; 3; 4] = [[1]; [1; 2]; [1; 2; 3]; [1; 2; 3; 4]]
 let rec insert lst n =
   match lst with
   | [] -> [n]
-  | first :: rest -> if first < n then first :: insert rest n else n :: lst
+  | first :: rest ->
+      if first < n then
+        first :: insert rest n
+      else
+        n :: lst
 
 (* テスト *)
 let test_insert1 = insert [] 3 = [3]
@@ -57,7 +61,9 @@ let test_insert5 = insert [1; 1; 3] 1 = [1; 1; 1; 3]
 (* 目的：整数のリストを受け取ったら，それを昇順に整列したリストを返す関数 *)
 (* ins_sort : int list -> int list *)
 let rec ins_sort lst =
-  match lst with [] -> [] | first :: rest -> insert (ins_sort rest) first
+  match lst with
+  | [] -> []
+  | first :: rest -> insert (ins_sort rest) first
 
 let test_ins_sort1 = ins_sort [] = []
 
@@ -89,8 +95,10 @@ let rec gakusei_insert lst gakusei =
   match lst with
   | [] -> [gakusei]
   | ({tensuu} as first) :: rest ->
-      if tensuu < gakusei.tensuu then first :: gakusei_insert rest gakusei
-      else gakusei :: lst
+      if tensuu < gakusei.tensuu then
+        first :: gakusei_insert rest gakusei
+      else
+        gakusei :: lst
 
 let test_gakusei_insert1 = gakusei_insert [] g1 = [g1]
 
@@ -143,8 +151,10 @@ let rec person_insert lst person =
   match lst with
   | [] -> [person]
   | ({name} as first) :: rest ->
-      if name < person.name then first :: person_insert rest person
-      else person :: lst
+      if name < person.name then
+        first :: person_insert rest person
+      else
+        person :: lst
 
 (* テスト *)
 let test_person_insert1 = person_insert [] p1 = [p1]
@@ -170,3 +180,153 @@ let test_person_sort3 = person_sort [p1; p2; p3] = [p2; p1; p3]
 let test_person_sort4 = person_sort [p3; p1; p2] = [p2; p1; p3]
 
 let test_person_sort5 = person_sort [p1; p4; p2] = [p2; p1; p4]
+
+(* sec10.2 *)
+(* 目的：受け取った lst の中の最小値を返す *)
+(* minimum : int list -> int *)
+let rec minimum lst =
+  match lst with
+  | [] -> max_int
+  | first :: rest ->
+      if first <= minimum rest then
+        first
+      else
+        minimum rest
+
+let rec minimum' lst =
+  match lst with
+  | [] -> max_int
+  | first :: rest ->
+      let min_rest = minimum rest in
+      if first <= min_rest then
+        first
+      else
+        min_rest
+
+(* テスト *)
+let test1 = minimum [3] = 3
+
+let test2 = minimum [1; 2] = 1
+
+let test3 = minimum [3; 2] = 2
+
+let test4 = minimum [3; 2; 6; 4; 1; 8] = 1
+
+(* exer10.5 *)
+(* 目的：gakusei_t 型のリストを受け取ったら，その中の最高得点を受け取った人のレコードを返す *)
+(* gakusei_max : gakusei_t list -> gakusei_t *)
+let rec gakusei_max lst =
+  match lst with
+  | [] -> {namae= "nanashi"; tensuu= -1; seiseki= "X"}
+  | ({tensuu} as first) :: rest ->
+      if tensuu >= (gakusei_max rest).tensuu then
+        first
+      else
+        gakusei_max rest
+
+let test_gakusei_max1 = gakusei_max [g1] = g1
+
+let test_gakusei_max2 = gakusei_max [g1; g2; g3] = g2
+
+let test_gakusei_max3 = gakusei_max [g3; g1; g2] = g2
+
+let test_gakusei_max4 = gakusei_max [g1; g4] = g1 (* 同点なら先に出たものを返す *)
+
+let test_gakusei_max5 = gakusei_max [g4; g1; g3] = g4
+
+(* exer10.6 *)
+(* 目的：gakusei_t 型のリストを受け取ったら，その中の最高得点を受け取った人のレコードを返す．局所定義版 *)
+(* gakusei_max : gakusei_t list -> gakusei_t *)
+let rec gakusei_max' lst =
+  match lst with
+  | [] -> {namae= "nanashi"; tensuu= -1; seiseki= "X"}
+  | ({tensuu} as first) :: rest ->
+      let gakusei_max_rest = gakusei_max rest in
+      if tensuu >= gakusei_max_rest.tensuu then
+        first
+      else
+        gakusei_max_rest
+
+let test_gakusei_max1 = gakusei_max' [g1] = g1
+
+let test_gakusei_max2 = gakusei_max' [g1; g2; g3] = g2
+
+let test_gakusei_max3 = gakusei_max' [g3; g1; g2] = g2
+
+let test_gakusei_max4 = gakusei_max' [g1; g4] = g1 (* 同点なら先に出たものを返す *)
+
+let test_gakusei_max5 = gakusei_max' [g4; g1; g3] = g4
+
+(* sec10.4 *)
+(* 目的：学生リスト lst のうち各成績の人数を集計する *)
+(* shukei : gakusei_t list -> int * int * int * int *)
+let rec shukei lst =
+  match lst with
+  | [] -> (0, 0, 0, 0)
+  | {namae= n; tensuu= t; seiseki= s} :: rest ->
+      let a, b, c, d = shukei rest in
+      (* match shukei_rest with *)
+      (* | a, b, c, d -> *)
+      if s = "A" then
+        (a + 1, b, c, d)
+      else if s = "B" then
+        (a, b + 1, c, d)
+      else if s = "C" then
+        (a, b, c + 1, d)
+      else
+        (a, b, c, d + 1)
+
+(* exer10.7 *)
+(* 目的：person_t 型のリストを受け取ったら，各血液型の人が何人いるかを組みにして返す関数 *)
+(* ketsueki_shukei : person_t list -> int * int * int * int *)
+let rec ketsueki_shukei lst =
+  match lst with
+  | [] -> (0, 0, 0, 0)
+  | {blood} :: rest -> (
+      let a, b, o, ab = ketsueki_shukei rest in
+      match blood with
+      | "A" -> (a + 1, b, o, ab)
+      | "B" -> (a, b + 1, o, ab)
+      | "O" -> (a, b, o + 1, ab)
+      | "AB" -> (a, b, o, ab + 1)
+      | _ -> (a, b, o, ab) )
+
+(* テスト *)
+let test_ketsueki_shukei1 = ketsueki_shukei [] = (0, 0, 0, 0)
+
+let test_ketsueki_shukei2 = ketsueki_shukei [p1] = (1, 0, 0, 0)
+
+let test_ketsueki_shukei3 = ketsueki_shukei [p2; p3; p4] = (0, 1, 1, 1)
+
+let test_ketsueki_shukei4 = ketsueki_shukei [p1; p2; p3; p4] = (1, 1, 1, 1)
+
+let test_ketsueki_shukei5 =
+  ketsueki_shukei [p4; p1; p2; p3; p1] = (2, 1, 1, 1)
+
+(* exer10.8 *)
+let rec saita_ketsueki_list lst =
+  match lst with
+  | [] -> ("X", min_int)
+  | ((b, sum) as ret) :: rest ->
+      let ((mb, msum) as m) = saita_ketsueki_list rest in
+      if sum >= msum then
+        ret
+      else
+        m
+
+(* 目的：person_t 型のリストを受け取ったら，4つの血液型のうち，最も人数の多かった血液型を返す *)
+(* saita_ketsueki : person_t list -> string *)
+let rec saita_ketsueki lst =
+  let a, b, o, ab = ketsueki_shukei lst in
+  fst (saita_ketsueki_list [("A", a); ("B", b); ("O", o); ("AB", ab)])
+
+(* テスト *)
+let test_saita_ketsueki1 = saita_ketsueki [] = "A" (* 全て0ならA *)
+
+let test_saita_ketsueki2 = saita_ketsueki [p1] = "A"
+
+let test_saita_ketsueki3 = saita_ketsueki [p2; p3] = "B" (* BとOが同数ならB *)
+
+let test_saita_ketsueki4 = saita_ketsueki [p2; p2; p3] = "B"
+
+let test_saita_ketsueki5 = saita_ketsueki [p1; p1; p2; p3; p4] = "A"

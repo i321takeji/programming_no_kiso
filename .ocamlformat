@@ -1,5 +1,9 @@
 profile = ocamlformat
-break-cases = fit
+# break-cases = fit
+# break-cases = vertical
+break-cases = all
+if-then-else=vertical
+# if-then-else={compact|fit-or-vertical|vertical|keyword-first|k-r}
 margin = 77
 wrap-comments = true
 line-endings = lf
