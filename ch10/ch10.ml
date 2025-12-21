@@ -330,3 +330,42 @@ let test_saita_ketsueki3 = saita_ketsueki [p2; p3] = "B" (* BとOが同数なら
 let test_saita_ketsueki4 = saita_ketsueki [p2; p2; p3] = "B"
 
 let test_saita_ketsueki5 = saita_ketsueki [p1; p1; p2; p3; p4] = "A"
+
+let rec maximum lst =
+  match lst with
+  | [] -> min_int
+  | first :: rest ->
+      let max_rest = maximum rest in
+      if first >= max_rest then
+        first
+      else
+        max_rest
+
+let rec saita_ketsueki_all lst max_n =
+  match lst with
+  | [] -> []
+  | (b, sum) :: rest ->
+      let rest_result = saita_ketsueki_all rest max_n in
+      if sum = max_n then
+        b :: rest_result
+      else
+        rest_result
+
+let saita_ketsueki' lst =
+  let a, b, o, ab = ketsueki_shukei lst in
+  let max_n = maximum [a; b; o; ab] in
+  if a + b + o + ab = 0 then
+    []
+  else
+    saita_ketsueki_all [("A", a); ("B", b); ("O", o); ("AB", ab)] max_n
+
+let test_saita_ketsueki1' = saita_ketsueki' [] = []
+
+let test_saita_ketsueki2' = saita_ketsueki' [p1] = ["A"]
+
+let test_saita_ketsueki3' = saita_ketsueki' [p2; p3] = ["B"; "O"]
+(* BとOが同数ならB *)
+
+let test_saita_ketsueki4' = saita_ketsueki' [p2; p2; p3] = ["B"]
+
+let test_saita_ketsueki5' = saita_ketsueki' [p1; p1; p2; p3; p4] = ["A"]
