@@ -451,3 +451,109 @@ let global_ekikan_list =
   ; {kiten= "平和台"; shuten= "営団赤塚"; keiyu= "有楽町線"; kyori= 1.8; jikan= 2}
   ; {kiten= "営団赤塚"; shuten= "営団成増"; keiyu= "有楽町線"; kyori= 1.5; jikan= 2}
   ; {kiten= "営団成増"; shuten= "和光市"; keiyu= "有楽町線"; kyori= 2.1; jikan= 3} ]
+
+(* exer10.10 *)
+(* 目的：ローマ字の駅名と駅名リストを受け取り，その駅の漢字表記を文字列で返す *)
+(* romaji_to_kanji : string -> ekimei_t list -> string *)
+let rec romaji_to_kanji eki_romaji ekimei_lst =
+  match ekimei_lst with
+  | [] -> ""
+  | {romaji; kanji} :: rest ->
+      if eki_romaji = romaji then
+        kanji
+      else
+        romaji_to_kanji eki_romaji rest
+
+(* テスト *)
+let test_romaji_to_kanji1 =
+  romaji_to_kanji "myogadani" global_ekimei_list = "茗荷谷"
+
+let test_romaji_to_kanji2 = romaji_to_kanji "tokyo" global_ekimei_list = "東京"
+
+let test_romaji_to_kanji3 =
+  romaji_to_kanji "shibuya" global_ekimei_list = "渋谷"
+
+let test_romaji_to_kanji4 =
+  romaji_to_kanji "nonexistent" global_ekimei_list = ""
+
+let test_romaji_to_kanji5 =
+  romaji_to_kanji "ueno"
+    [{kanji= "上野"; kana= "うえの"; romaji= "ueno"; shozoku= "銀座線"}]
+  = "上野"
+
+let test_romaji_to_kanji6 = romaji_to_kanji "ueno" [] = ""
+
+(* exer10.11 *)
+(* 目的：漢字の駅名を二つと駅間リスト (ekikan_t list) を受け取り，駅間リストの中から2駅間の距離を返す *)
+(* get_ekikan_kyori : string -> string -> ekikan_t list -> float *)
+let rec get_ekikan_kyori eki1_kanji eki2_kanji ekikan_lst =
+  match ekikan_lst with
+  | [] -> infinity
+  | {kiten; shuten; kyori} :: rest ->
+      if
+        (eki1_kanji = kiten && eki2_kanji = shuten)
+        || (eki2_kanji = kiten && eki1_kanji = shuten)
+      then
+        kyori
+      else
+        get_ekikan_kyori eki1_kanji eki2_kanji rest
+
+(* テスト *)
+let test_get_ekikan_kyori0 =
+  get_ekikan_kyori "茗荷谷" "新大塚" global_ekikan_list = 1.2
+
+let test_get_ekikan_kyori1 =
+  get_ekikan_kyori "代々木上原" "代々木公園" global_ekikan_list = 1.0
+
+let test_get_ekikan_kyori2 =
+  get_ekikan_kyori "代々木公園" "代々木上原" global_ekikan_list = 1.0
+
+let test_get_ekikan_kyori3 =
+  get_ekikan_kyori "茗荷谷" "後楽園" global_ekikan_list = 1.8
+
+let test_get_ekikan_kyori4 =
+  get_ekikan_kyori "茅場町" "日本橋" global_ekikan_list = 0.5
+
+let test_get_ekikan_kyori5 =
+  get_ekikan_kyori "茗荷谷" "渋谷" global_ekikan_list = infinity
+
+let test_get_ekikan_kyori6 = get_ekikan_kyori "茗荷谷" "後楽園" [] = infinity
+
+(* exer10.12 *)
+(* 目的：ローマ字の駅名を二つ取り，その距離を調べて，結果を表示する *)
+(* kyori_wo_hyoji : string -> string -> string *)
+let kyori_wo_hyoji eki1_romaji eki2_romaji =
+  let eki1_kanji = romaji_to_kanji eki1_romaji global_ekimei_list in
+  let eki2_kanji = romaji_to_kanji eki2_romaji global_ekimei_list in
+  match (eki1_kanji, eki2_kanji) with
+  | "", "" -> eki1_romaji ^ " と " ^ eki2_romaji ^ " という駅は存在しません"
+  | "", _ -> eki1_romaji ^ " という駅は存在しません"
+  | _, "" -> eki2_romaji ^ " という駅は存在しません"
+  | _, _ ->
+      let eki_kyori =
+        get_ekikan_kyori eki1_kanji eki2_kanji global_ekikan_list
+      in
+      if eki_kyori = infinity then
+        eki1_kanji ^ "駅と" ^ eki2_kanji ^ "駅はつながっていません"
+      else
+        eki1_kanji ^ "駅から" ^ eki2_kanji ^ "駅までは " ^ string_of_float eki_kyori
+        ^ "km です"
+
+(* テスト *)
+let test_kyori_wo_hyoji0 =
+  kyori_wo_hyoji "myogadani" "shinotsuka" = "茗荷谷駅から新大塚駅までは 1.2km です"
+
+let test_kyori_wo_hyoji1 =
+  kyori_wo_hyoji "myogadani" "korakuen" = "茗荷谷駅から後楽園駅までは 1.8km です"
+
+let test_kyori_wo_hyoji2 =
+  kyori_wo_hyoji "myogadani" "shibuya" = "茗荷谷駅と渋谷駅はつながっていません"
+
+let test_kyori_wo_hyoji3 =
+  kyori_wo_hyoji "unknown" "myogadani" = "unknown という駅は存在しません"
+
+let test_kyori_wo_hyoji4 =
+  kyori_wo_hyoji "myogadani" "unknown" = "unknown という駅は存在しません"
+
+let test_kyori_wo_hyoji5 =
+  kyori_wo_hyoji "foo" "bar" = "foo と bar という駅は存在しません"

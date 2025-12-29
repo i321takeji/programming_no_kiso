@@ -369,3 +369,74 @@ let test_saita_ketsueki3' = saita_ketsueki' [p2; p3] = ["B"; "O"]
 let test_saita_ketsueki4' = saita_ketsueki' [p2; p2; p3] = ["B"]
 
 let test_saita_ketsueki5' = saita_ketsueki' [p1; p1; p2; p3; p4] = ["A"]
+
+(* sec10.5 *)
+(* 目的：lst1 と lst2 を受け取ったらそれらを結合したリストを返す *)
+(* append : 'a list -> 'a list -> 'a list *)
+let rec append lst1 lst2 =
+  match lst1 with
+  | [] -> lst2
+  | first :: rest -> first :: append rest lst2
+
+(* テスト *)
+let test1 = append [] [] = []
+
+let test2 = append [] [1; 2] = [1; 2]
+
+let test3 = append [1; 2] [] = [1; 2]
+
+let test4 = append [1; 2] [3; 4] = [1; 2; 3; 4]
+
+let test5 =
+  append ["a"; "b"; "c"; "d"; "e"] ["f"; "g"]
+  = ["a"; "b"; "c"; "d"; "e"; "f"; "g"]
+
+(* sec10.6 *)
+(* 目的：昇順に並んでいるリスト lst1 と lst2 をマージする *)
+(* merge : int list -> int list -> int list *)
+let rec merge lst1 lst2 =
+  match (lst1, lst2) with
+  | [], [] -> []
+  | [], first2 :: rest2 -> lst2
+  | first1 :: rest1, [] -> lst1
+  | first1 :: rest1, first2 :: rest2 ->
+      if first1 < first2 then
+        first1 :: merge rest1 lst2
+      else
+        first2 :: merge lst1 rest2
+
+(* テスト *)
+let test1 = merge [] [] = []
+
+let test2 = merge [] [1; 2] = [1; 2]
+
+let test3 = merge [1; 2] [] = [1; 2]
+
+let test4 = merge [1; 3] [2; 4] = [1; 2; 3; 4]
+
+let test5 = merge [2; 4] [1; 3] = [1; 2; 3; 4]
+
+let test6 = merge [1; 4] [1; 3] = [1; 1; 3; 4]
+
+(* exer10.9 *)
+(* 目的：二つのリストを受け取り，それらの長さが同じかどうかを判定 (length は使わない) *)
+(* equal_length : 'a list -> 'a list -> bool *)
+let rec equal_length lst1 lst2 =
+  match (lst1, lst2) with
+  | [], [] -> true
+  | [], _ -> false
+  | _, [] -> false
+  | _ :: rest1, _ :: rest2 -> equal_length rest1 rest2
+
+(* テスト *)
+let test_equal_length1 = equal_length [] [] = true
+
+let test_equal_length2 = equal_length [] [1] = false
+
+let test_equal_length3 = equal_length [1] [] = false
+
+let test_equal_length4 = equal_length [1; 2; 3] [4; 5; 6] = true
+
+let test_equal_length5 = equal_length [1; 2] [3; 4; 5] = false
+
+let test_equal_length6 = equal_length ["a"; "b"] ["x"; "y"] = true
