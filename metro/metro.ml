@@ -557,3 +557,122 @@ let test_kyori_wo_hyoji4 =
 
 let test_kyori_wo_hyoji5 =
   kyori_wo_hyoji "foo" "bar" = "foo と bar という駅は存在しません"
+
+(* exer12.1 *)
+(* 駅名，現在の最短距離，現在の最短経路を持つレコード型 *)
+type eki_t =
+  { namae: string (* 駅名 *)
+  ; saitan_kyori: float (*現在の最短距離*)
+  ; temae_list: string list (*現在の最短距離*) }
+
+(* exer12.2 *)
+(* 目的：ekimei_t 型のリストを受け取ったら，その駅名を使って eki_t 型のリストを作る *)
+(* make_eki_list : ekimei_t list -> eki_t list *)
+let rec make_eki_list ekimei_lst =
+  match ekimei_lst with
+  | [] -> []
+  | {kanji} :: rest ->
+      {namae= kanji; saitan_kyori= infinity; temae_list= []}
+      :: make_eki_list rest
+
+(* テスト *)
+let test_make_eki_list1 = make_eki_list [] = []
+
+let test_make_eki_list2 =
+  make_eki_list
+    [{kanji= "茗荷谷"; kana= "みょうがだに"; romaji= "myogadani"; shozoku= "丸ノ内線"}]
+  = [{namae= "茗荷谷"; saitan_kyori= infinity; temae_list= []}]
+
+let test_make_eki_list3 =
+  make_eki_list
+    [ {kanji= "茗荷谷"; kana= "みょうがだに"; romaji= "myogadani"; shozoku= "丸ノ内線"}
+    ; {kanji= "新宿"; kana= "しんじゅく"; romaji= "shinjuku"; shozoku= "山手線"} ]
+  = [ {namae= "茗荷谷"; saitan_kyori= infinity; temae_list= []}
+    ; {namae= "新宿"; saitan_kyori= infinity; temae_list= []} ]
+
+(* exer12.3 *)
+(* 目的：eki_t 型のリストと起点を受け取ったら，起点を次の状態 (saitan_kyori は 0，temae_list は支店の駅名のみからなるリスト) にする *)
+(* shokika : eki_t list -> string -> eki_t list *)
+let rec shokika eki_lst start =
+  match eki_lst with
+  | [] -> []
+  | ({namae} as eki) :: rest ->
+      let init_eki =
+        if namae = start then
+          {namae; saitan_kyori= 0.0; temae_list= [start]}
+        else
+          eki
+      in
+      init_eki :: shokika rest start
+
+(* テスト *)
+let test_shokika1 = shokika [] "茗荷谷" = []
+
+let test_shokika2 =
+  shokika [{namae= "茗荷谷"; saitan_kyori= infinity; temae_list= []}] "茗荷谷"
+  = [{namae= "茗荷谷"; saitan_kyori= 0.0; temae_list= ["茗荷谷"]}]
+
+let test_shokika3 =
+  shokika
+    [ {namae= "茗荷谷"; saitan_kyori= infinity; temae_list= []}
+    ; {namae= "新宿"; saitan_kyori= infinity; temae_list= []} ]
+    "新宿"
+  = [ {namae= "茗荷谷"; saitan_kyori= infinity; temae_list= []}
+    ; {namae= "新宿"; saitan_kyori= 0.0; temae_list= ["新宿"]} ]
+
+let test_shokika4 =
+  shokika
+    [ {namae= "茗荷谷"; saitan_kyori= infinity; temae_list= []}
+    ; {namae= "新宿"; saitan_kyori= infinity; temae_list= []} ]
+    "渋谷"
+  = [ {namae= "茗荷谷"; saitan_kyori= infinity; temae_list= []}
+    ; {namae= "新宿"; saitan_kyori= infinity; temae_list= []} ]
+
+(* exer12.4 *)
+let rec insert_ekimei ekimei_lst ekimei =
+  match ekimei_lst with
+  | [] -> [ekimei]
+  | ({kana} as first) :: rest ->
+      if kana = ekimei.kana then
+        ekimei_lst
+        (* insert_ekimei rest ekimei *)
+      else if kana < ekimei.kana then
+        first :: insert_ekimei rest ekimei
+      else
+        ekimei :: ekimei_lst
+
+let test_insert_ekimei1 =
+  insert_ekimei [] {kanji= "英"; kana= "えい"; romaji= "ei"; shozoku= "A線"}
+  = [{kanji= "英"; kana= "えい"; romaji= "ei"; shozoku= "A線"}]
+
+let test_insert_ekimei2 =
+  insert_ekimei
+    [ {kanji= "英"; kana= "えい"; romaji= "ei"; shozoku= "A線"}
+    ; {kanji= "美"; kana= "びい"; romaji= "bi"; shozoku= "B線"} ]
+    {kanji= ""; kana= "えい"; romaji= ""; shozoku= ""}
+  = [ {kanji= "英"; kana= "えい"; romaji= "ei"; shozoku= "A線"}
+    ; {kanji= "美"; kana= "びい"; romaji= "bi"; shozoku= "B線"} ]
+
+(* 目的：ekimei_t 型のリストを受け取ったら，ひらがなの順に整列し，さらに駅の重複を取り除いた ekimei_t 型のリストを返す *)
+(* seiretsu : ekimei_t -> ekimei_t *)
+let rec seiretsu ekimei_lst =
+  match ekimei_lst with
+  | [] -> []
+  | first :: rest -> insert_ekimei (seiretsu rest) first
+
+let test_seiretsu1 = [] = []
+
+let test_seiretsu2 =
+  seiretsu
+    [ {kanji= "A"; kana= "あ"; romaji= "a"; shozoku= "L1"}
+    ; {kanji= "B"; kana= "あ"; romaji= "a"; shozoku= "L2"} ]
+  = [{kanji= "B"; kana= "あ"; romaji= "a"; shozoku= "L2"}]
+
+let test_seiretsu3 =
+  seiretsu
+    [ {kanji= "美"; kana= "びい"; romaji= "bi"; shozoku= "B線"}
+    ; {kanji= "英"; kana= "えい"; romaji= "ei"; shozoku= "A線"}
+    ; {kanji= "栄"; kana= "えい"; romaji= "ei"; shozoku= "A線"}
+    ; {kanji= "衛"; kana= "えい"; romaji= "ei"; shozoku= "A線"} ]
+  = [ {kanji= "衛"; kana= "えい"; romaji= "ei"; shozoku= "A線"}
+    ; {kanji= "美"; kana= "びい"; romaji= "bi"; shozoku= "B線"} ]
