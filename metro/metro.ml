@@ -1228,3 +1228,109 @@ let test_seiretsu6 =
 
 let seiretsu_global_ekimei_list_length =
   List.length (seiretsu global_ekimei_list)
+
+(* exer13.6 *)
+(* 目的：直前に確定した駅 (eki_t 型) と未確定の駅 q (eki_t 型) を受け取ったら， p と q 直接つながっているかどうかを調べ，
+   つながっていたら q の最短距離と手前リストを必要に応じて更新したもの - つながっていなかったら元の q をそのまま返す関数 *)
+(* koushin1 : eki_t -> eki_t -> eki_t *)
+let koushin1_ekikan ekikan_lst p q =
+  let pq_kyori = get_ekikan_kyori p.namae q.namae ekikan_lst in
+  let new_kyori = p.saitan_kyori +. pq_kyori in
+  if new_kyori < q.saitan_kyori then
+    { namae = q.namae
+    ; saitan_kyori = new_kyori
+    ; temae_list = q.namae :: p.temae_list
+    }
+  else
+    (* p-q が繋がっていない or 距離が小さくならない場合 *)
+    q
+
+let koushin1 p q = koushin1_ekikan global_ekikan_list p q
+
+let test_koushin1 =
+  (* 直結していて、更新した方が短くなるケース *)
+  let p = { namae = "代々木上原"; saitan_kyori = 0.; temae_list = ["代々木上原"] } in
+  let q = { namae = "代々木公園"; saitan_kyori = infinity; temae_list = [] } in
+  koushin1 p q
+
+let test_koushin1_1 =
+  (* 直結していて、更新した方が短くなるケース *)
+  let p = { namae = "代々木上原"; saitan_kyori = 0.; temae_list = ["代々木上原"] } in
+  let q = { namae = "代々木公園"; saitan_kyori = infinity; temae_list = [] } in
+  koushin1 p q
+  = { namae = "代々木公園"; saitan_kyori = 1.0; temae_list = ["代々木公園"; "代々木上原"] }
+
+let test_koushin1_2 =
+  (* 直結しているが、すでに q の方が短いので更新しないケース *)
+  let p = { namae = "代々木上原"; saitan_kyori = 10.; temae_list = ["代々木上原"] } in
+  let q =
+    { namae = "代々木公園"; saitan_kyori = 2.; temae_list = ["代々木公園"; "千代田"] }
+  in
+  koushin1 p q = q
+
+let test_koushin1_3 =
+  (* 直結していないのでそのまま返すケース *)
+  let p = { namae = "茗荷谷"; saitan_kyori = 0.; temae_list = ["茗荷谷"] } in
+  let q = { namae = "渋谷"; saitan_kyori = infinity; temae_list = [] } in
+  koushin1 p q = q
+
+let test_koushin1_4 =
+  (* 直結していても新しい距離が同じなら更新しない（境界値） *)
+  let p = { namae = "代々木上原"; saitan_kyori = 1.; temae_list = ["代々木上原"] } in
+  let q =
+    { namae = "代々木公園"; saitan_kyori = 2.; temae_list = ["代々木公園"; "既存"] }
+  in
+  koushin1 p q = q
+
+let test_koushin1_5 =
+  (* p の最短距離が infinity なら、直結でも更新しない *)
+  let p =
+    { namae = "代々木上原"; saitan_kyori = infinity; temae_list = ["代々木上原"] }
+  in
+  let q = { namae = "代々木公園"; saitan_kyori = infinity; temae_list = [] } in
+  koushin1 p q = q
+
+let test_koushin1_6 =
+  (* 更新時に temae_list が q.namae :: p.temae_list になることを確認 *)
+  let p =
+    { namae = "代々木上原"; saitan_kyori = 3.; temae_list = ["代々木上原"; "A"; "B"] }
+  in
+  let q = { namae = "代々木公園"; saitan_kyori = infinity; temae_list = [] } in
+  koushin1 p q
+  = { namae = "代々木公園"
+    ; saitan_kyori = 4.0
+    ; temae_list = ["代々木公園"; "代々木上原"; "A"; "B"]
+    }
+
+(* exer13.7 *)
+(* 目的：直前に確定した駅 (eki_t 型) と未確定の駅のリスト v (eki_t list 型) を受け取ったら，
+   必要な更新処理を行った後の未確定の駅のリストを返す関数 *)
+(* koushin : eki_t -> eki_t list -> eki_t list *)
+let koushin p v = List.map (koushin1 p) v
+
+(* テスト *)
+let test_ekikan_list =
+  [ { kiten = "A"; shuten = "B"; keiyu = "Book"; kyori = 10.0; jikan = 0 }
+  ; { kiten = "A"; shuten = "D"; keiyu = "Book"; kyori = 4.0; jikan = 0 }
+  ; { kiten = "B"; shuten = "C"; keiyu = "Book"; kyori = 2.0; jikan = 0 }
+  ; { kiten = "B"; shuten = "E"; keiyu = "Book"; kyori = 2.0; jikan = 0 }
+  ; { kiten = "C"; shuten = "E"; keiyu = "Book"; kyori = 1.0; jikan = 0 }
+  ; { kiten = "D"; shuten = "E"; keiyu = "Book"; kyori = 3.0; jikan = 0 } ]
+
+(* テストしにくいので，koushin の ekikan_lst を取る版 *)
+let koushin_ekikan ekikan_lst p v = List.map (koushin1_ekikan ekikan_lst p) v
+
+(* fig12.2 -> fig12.3 *)
+let test1_koushin =
+  let p = { namae = "A"; saitan_kyori = 0.0; temae_list = ["A"] } in
+  let v =
+    [ { namae = "B"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "C"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "D"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "E"; saitan_kyori = infinity; temae_list = [] } ]
+  in
+  koushin_ekikan test_ekikan_list p v
+  = [ { namae = "B"; saitan_kyori = 10.0; temae_list = ["B"; "A"] }
+    ; { namae = "C"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "D"; saitan_kyori = 4.0; temae_list = ["D"; "A"] }
+    ; { namae = "E"; saitan_kyori = infinity; temae_list = [] } ]

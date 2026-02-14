@@ -151,3 +151,57 @@ let test_person_namae3 = person_namae [person1; person2] = ["o"; "a"]
 
 let test_person_namae4 =
   person_namae [person2; person3; person1] = ["a"; "c"; "o"]
+
+(* exer13.3 *)
+(* id *)
+let f1 x = x
+
+(* const *)
+let f2 x y = x
+
+(* const id *)
+let f3 x y = y
+
+(* apply *)
+let f4 x f = f x
+
+let f5 f g x = g (f x)
+
+(* exer13.4 *)
+(* 目的：関数をふたつ受け取ったら，その二つの関数を合成した関数を返す関数 *)
+(* compose : ('b -> 'c) -> ('a -> 'b) -> 'a -> 'c *)
+let compose f g x = f (g x)
+
+let time2 x = x * 2
+
+let add3 x = x + 3
+
+(* テストケース *)
+let test1 = (compose time2 add3) 4 = 14 (* 例題どおり *)
+
+let test2 = (compose time2 add3) 0 = 6
+
+let test3 = (compose time2 add3) (-2) = 2
+
+(* 文字列でもテスト *)
+let strlen s = String.length s
+
+let is_even n = n mod 2 = 0
+
+let test4 = (compose is_even strlen) "ocaml" = false (* 5 は奇数 *)
+
+let test5 = (compose is_even strlen) "fp" = true (* 2 は偶数 *)
+
+(* 実行確認用 *)
+let () =
+  assert test1 ;
+  assert test2 ;
+  assert test3 ;
+  assert test4 ;
+  assert test5 ;
+  print_endline "compose tests passed"
+
+(* exer13.5 *)
+let twice f =
+  let g x = f (f x) in
+  g
