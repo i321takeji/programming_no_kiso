@@ -1235,8 +1235,10 @@ let seiretsu_global_ekimei_list_length =
 (* koushin1 : eki_t -> eki_t -> eki_t *)
 let koushin1_ekikan ekikan_lst p q =
   let pq_kyori = get_ekikan_kyori p.namae q.namae ekikan_lst in
+  let is_connected = pq_kyori <> infinity in
+  (* お行儀よく *)
   let new_kyori = p.saitan_kyori +. pq_kyori in
-  if new_kyori < q.saitan_kyori then
+  if is_connected && new_kyori < q.saitan_kyori then
     { namae = q.namae
     ; saitan_kyori = new_kyori
     ; temae_list = q.namae :: p.temae_list
