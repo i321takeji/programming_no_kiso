@@ -87,15 +87,16 @@ let rec count_A lst =
   let is_A gakusei = gakusei.seiseki = "A" in
   List.length (List.filter is_A lst)
 
-let test_count_A = count_A [] = 0
+(* テスト *)
+let test_count_A1 = count_A [] = 0
 
-let test_count_A = count_A [g1] = 0
+let test_count_A2 = count_A [g1] = 0
 
-let test_count_A = count_A [g2] = 1
+let test_count_A3 = count_A [g2] = 1
 
-let test_count_A = count_A [g1; g2; g3] = 2
+let test_count_A4 = count_A [g1; g2; g3] = 2
 
-let test_count_A = count_A [g1; g4] = 0
+let test_count_A5 = count_A [g1; g4] = 0
 
 (* 目的：受け取ったリスト lst の各要素の和を求める *)
 (* sum : int list -> int *)
@@ -148,3 +149,40 @@ let cons first rest_result = first :: rest_result
 (* 目的：lst1 と lst2 を受け取りそれらを結合したリストを返す *)
 (* append : 'a list -> 'a list -> 'a list *)
 let rec append lst1 lst2 = fold_right cons lst1 lst2
+
+(* exer14.3 *)
+(* 目的：問題 9.6 で作成した関数 concat を fold_right を使って書き直す *)
+(* concat : string list -> string *)
+let rec concat lst = fold_right ( ^ ) lst ""
+
+let test_concat1 = concat [] = ""
+
+let test_concat2 = concat ["a"] = "a"
+
+let test_concat3 = concat ["ab"; "cd"] = "abcd"
+
+let test_concat4 = concat ["春"; "夏"; "秋"; "冬"] = "春夏秋冬"
+
+let test_concat5 = concat ["a"; ""; "b"; ""] = "ab"
+
+(* exer14.4 *)
+(* 目的：gakusei_t 型のリストを受け取ったら，全員の得点の合計を返す関数 *)
+(* gakusei_sum gakusei_t list -> int *)
+let gakusei_sum lst =
+  let add_gakusei_tensuu gakusei rest_result =
+    gakusei.tensuu + rest_result
+  in
+  fold_right add_gakusei_tensuu lst 0
+
+(* テスト *)
+
+let test_gakusei_sum1 = gakusei_sum [] = 0
+
+let test_gakusei_sum2 = gakusei_sum [g1] = g1.tensuu
+
+let test_gakusei_sum3 = gakusei_sum [g2] = g2.tensuu
+
+let test_gakusei_sum4 =
+  gakusei_sum [g1; g2; g3] = g1.tensuu + g2.tensuu + g3.tensuu
+
+let test_gakusei_sum5 = gakusei_sum [g1; g4] = g1.tensuu + g4.tensuu
