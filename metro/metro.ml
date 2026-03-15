@@ -1336,3 +1336,150 @@ let test1_koushin =
     ; { namae = "C"; saitan_kyori = infinity; temae_list = [] }
     ; { namae = "D"; saitan_kyori = 4.0; temae_list = ["D"; "A"] }
     ; { namae = "E"; saitan_kyori = infinity; temae_list = [] } ]
+
+(* exer14.7 *)
+(* 目的：koushin1 を koushin の中に局所的に定義するように変更 *)
+(* koushin : eki_t -> eki_t list -> eki_t list *)
+let koushin p v =
+  let koushin1_ekikan ekikan_lst p q =
+    let pq_kyori = get_ekikan_kyori p.namae q.namae ekikan_lst in
+    let is_connected = pq_kyori <> infinity in
+    (* お行儀よく *)
+    let new_kyori = p.saitan_kyori +. pq_kyori in
+    if is_connected && new_kyori < q.saitan_kyori then
+      { namae = q.namae
+      ; saitan_kyori = new_kyori
+      ; temae_list = q.namae :: p.temae_list
+      }
+    else
+      (* p-q が繋がっていない or 距離が小さくならない場合 *)
+      q
+  in
+  let koushin1 p q = koushin1_ekikan global_ekikan_list p q in
+  List.map (koushin1 p) v
+
+(* exer14.11 *)
+(* 目的：exer12.2 の make_eki_list を map と無名関数で書き換え *)
+(* make_eki_list : ekimei_t list -> eki_t list *)
+let rec make_eki_list ekimei_lst =
+  List.map
+    (fun ekimei ->
+      { namae = ekimei.kanji; saitan_kyori = infinity; temae_list = [] } )
+    ekimei_lst
+
+(* テスト *)
+let test_make_eki_list1 = make_eki_list [] = []
+
+let test_make_eki_list2 =
+  make_eki_list
+    [ { kanji = "茗荷谷"
+      ; kana = "みょうがだに"
+      ; romaji = "myogadani"
+      ; shozoku = "丸ノ内線"
+      } ]
+  = [{ namae = "茗荷谷"; saitan_kyori = infinity; temae_list = [] }]
+
+let test_make_eki_list3 =
+  make_eki_list
+    [ { kanji = "茗荷谷"
+      ; kana = "みょうがだに"
+      ; romaji = "myogadani"
+      ; shozoku = "丸ノ内線"
+      }
+    ; { kanji = "新宿"; kana = "しんじゅく"; romaji = "shinjuku"; shozoku = "山手線" }
+    ]
+  = [ { namae = "茗荷谷"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "新宿"; saitan_kyori = infinity; temae_list = [] } ]
+
+(* exer14.11 *)
+(* 目的：exer12.2 の shokika を map と無名関数で書き換え *)
+(* shokika : eki_t list -> string -> eki_t list *)
+let rec shokika eki_lst start =
+  List.map
+    (fun ({ namae } as eki) ->
+      if namae = start then
+        { namae; saitan_kyori = 0.0; temae_list = [start] }
+      else
+        eki )
+    eki_lst
+
+(* テスト *)
+let test_shokika1 = shokika [] "茗荷谷" = []
+
+let test_shokika2 =
+  shokika [{ namae = "茗荷谷"; saitan_kyori = infinity; temae_list = [] }] "茗荷谷"
+  = [{ namae = "茗荷谷"; saitan_kyori = 0.0; temae_list = ["茗荷谷"] }]
+
+let test_shokika3 =
+  shokika
+    [ { namae = "茗荷谷"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "新宿"; saitan_kyori = infinity; temae_list = [] } ]
+    "新宿"
+  = [ { namae = "茗荷谷"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] } ]
+
+let test_shokika4 =
+  shokika
+    [ { namae = "茗荷谷"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "新宿"; saitan_kyori = infinity; temae_list = [] } ]
+    "渋谷"
+  = [ { namae = "茗荷谷"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "新宿"; saitan_kyori = infinity; temae_list = [] } ]
+
+(* exer14.12 *)
+(* 目的：make_eki_list と shokika を一度に行う関数 make_initial_eki_list を map と無名関数で書く *)
+(* make_initial_eki_list *)
+let make_initial_eki_list ekimei_lst start =
+  List.map
+    (fun ekimei ->
+      if ekimei.kanji = start then
+        { namae = ekimei.kanji; saitan_kyori = 0.0; temae_list = [start] }
+      else
+        { namae = ekimei.kanji; saitan_kyori = infinity; temae_list = [] } )
+    ekimei_lst
+
+(* テスト *)
+let test_make_initial_eki_list1 = make_initial_eki_list [] "茗荷谷" = []
+
+let test_make_initial_eki_list2 =
+  make_initial_eki_list
+    [ { kanji = "茗荷谷"
+      ; kana = "みょうがだに"
+      ; romaji = "myogadani"
+      ; shozoku = "丸ノ内線"
+      } ]
+    "新宿"
+  = [{ namae = "茗荷谷"; saitan_kyori = infinity; temae_list = [] }]
+
+let test_make_initial_eki_list3 =
+  make_initial_eki_list
+    [ { kanji = "茗荷谷"
+      ; kana = "みょうがだに"
+      ; romaji = "myogadani"
+      ; shozoku = "丸ノ内線"
+      }
+    ; { kanji = "新宿"; kana = "しんじゅく"; romaji = "shinjuku"; shozoku = "山手線" }
+    ]
+    "新宿"
+  = [ { namae = "茗荷谷"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] } ]
+
+(* exer14.13 *)
+(* 目的：exer14.7 で作成した koushin を，koushin1 を局所定義する代わりに名前のない関数を使って定義 *)
+(* koushin : eki_t -> eki_t list -> eki_t list *)
+let koushin p v =
+  List.map
+    (fun p q ->
+      let pq_kyori = get_ekikan_kyori p.namae q.namae global_ekikan_list in
+      let is_connected = pq_kyori <> infinity in
+      (* お行儀よく *)
+      let new_kyori = p.saitan_kyori +. pq_kyori in
+      if is_connected && new_kyori < q.saitan_kyori then
+        { namae = q.namae
+        ; saitan_kyori = new_kyori
+        ; temae_list = q.namae :: p.temae_list
+        }
+      else
+        (* p-q が繋がっていない or 距離が小さくならない場合 *)
+        q )
+    v
