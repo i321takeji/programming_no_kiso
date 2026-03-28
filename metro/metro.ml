@@ -1361,7 +1361,7 @@ let koushin p v =
 (* exer14.11 *)
 (* 目的：exer12.2 の make_eki_list を map と無名関数で書き換え *)
 (* make_eki_list : ekimei_t list -> eki_t list *)
-let rec make_eki_list ekimei_lst =
+let make_eki_list ekimei_lst =
   List.map
     (fun ekimei ->
       { namae = ekimei.kanji; saitan_kyori = infinity; temae_list = [] } )
@@ -1394,7 +1394,7 @@ let test_make_eki_list3 =
 (* exer14.11 *)
 (* 目的：exer12.2 の shokika を map と無名関数で書き換え *)
 (* shokika : eki_t list -> string -> eki_t list *)
-let rec shokika eki_lst start =
+let shokika eki_lst start =
   List.map
     (fun ({ namae } as eki) ->
       if namae = start then

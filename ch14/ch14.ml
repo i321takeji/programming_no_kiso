@@ -315,6 +315,19 @@ let test_count_A4 = count_A [g1; g2; g3] = 2
 
 let test_count_A5 = count_A [g1; g4] = 0
 
+(* concat : string list -> string *)
+let concat lst = fold_right (fun x y -> x ^ y) lst ""
+
+let test_concat1 = concat [] = ""
+
+let test_concat2 = concat ["a"] = "a"
+
+let test_concat3 = concat ["ab"; "cd"] = "abcd"
+
+let test_concat4 = concat ["春"; "夏"; "秋"; "冬"] = "春夏秋冬"
+
+let test_concat5 = concat ["a"; ""; "b"; ""] = "ab"
+
 (* gakusei_sum gakusei_t list -> int *)
 let gakusei_sum lst =
   fold_right (fun gakusei rest_result -> gakusei.tensuu + rest_result) lst 0
@@ -332,4 +345,19 @@ let test_gakusei_sum4 =
 
 let test_gakusei_sum5 = gakusei_sum [g1; g4] = g1.tensuu + g4.tensuu
 
-(* exer14.11 *)
+(* exer14.14 *)
+(* 目的：問題 9.6 または問題 14.3 で作成した関数 concat を 1 行で定義する
+   結果，問題 14.3 と同じ
+ *)
+(* concat : string list -> string *)
+let concat lst = fold_right ( ^ ) lst ""
+
+let test_concat1 = concat [] = ""
+
+let test_concat2 = concat ["a"] = "a"
+
+let test_concat3 = concat ["ab"; "cd"] = "abcd"
+
+let test_concat4 = concat ["春"; "夏"; "秋"; "冬"] = "春夏秋冬"
+
+let test_concat5 = concat ["a"; ""; "b"; ""] = "ab"
