@@ -361,3 +361,52 @@ let test_concat3 = concat ["ab"; "cd"] = "abcd"
 let test_concat4 = concat ["春"; "夏"; "秋"; "冬"] = "春夏秋冬"
 
 let test_concat5 = concat ["a"; ""; "b"; ""] = "ab"
+
+(* 目的：n から 1 までのリストを作る *)
+(* enumerate : int -> int list *)
+let rec enumerate n =
+  if n = 0 then
+    []
+  else
+    n :: enumerate (n - 1)
+
+(* 目的：n の約数のリストを返す *)
+(* divisor : int -> int list *)
+let divisor n = filter (fun x -> n mod x = 0) (enumerate n)
+
+(* 目的：m 以下の完全数のリストを返す *)
+(* perfect : int -> int list *)
+let perfect m =
+  filter (fun n -> fold_right ( + ) (divisor n) 0 - n = n) (enumerate m)
+
+(* exer14.15 *)
+(* 目的：1 から受け取った自然数までの合計を求める関数 one_to_n を enumerate と高階関数で作成 *)
+(* one_to_n : int -> int *)
+let one_to_n n = fold_right ( + ) (enumerate n) 0
+
+(* テスト *)
+let test_one_to_n1 = one_to_n 0 = 0
+
+let test_one_to_n2 = one_to_n 1 = 1
+
+let test_one_to_n3 = one_to_n 5 = 15
+
+let test_one_to_n4 = one_to_n 10 = 55
+
+let test_one_to_n5 = one_to_n 100 = 5050
+
+(* exer14.16 *)
+(* 目的：階乗を求める fac を enumerate と高階関数で作成 *)
+(* one_to_n : int -> int *)
+let fac n = fold_right ( * ) (enumerate n) 1
+
+(* テスト *)
+let test_fac1 = fac 0 = 1
+
+let test_fac2 = fac 1 = 1
+
+let test_fac4 = fac 3 = 6
+
+let test_fac4 = fac 5 = 120
+
+let test_fac5 = fac 10 = 3628800
