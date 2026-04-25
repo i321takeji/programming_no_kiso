@@ -1045,10 +1045,10 @@ let kyori_wo_hyoji eki1_romaji eki2_romaji =
   let eki1_kanji = romaji_to_kanji eki1_romaji global_ekimei_list in
   let eki2_kanji = romaji_to_kanji eki2_romaji global_ekimei_list in
   match (eki1_kanji, eki2_kanji) with
-  | "", "" -> eki1_romaji ^ " と " ^ eki2_romaji ^ " という駅は存在しません"
-  | "", _ -> eki1_romaji ^ " という駅は存在しません"
-  | _, "" -> eki2_romaji ^ " という駅は存在しません"
-  | _, _ ->
+  | ("", "") -> eki1_romaji ^ " と " ^ eki2_romaji ^ " という駅は存在しません"
+  | ("", _) -> eki1_romaji ^ " という駅は存在しません"
+  | (_, "") -> eki2_romaji ^ " という駅は存在しません"
+  | (_, _) ->
       let eki_kyori =
         get_ekikan_kyori eki1_kanji eki2_kanji global_ekikan_list
       in
@@ -1483,3 +1483,62 @@ let koushin p v =
         (* p-q が繋がっていない or 距離が小さくならない場合 *)
         q )
     v
+
+(* exer15.4 *)
+(* eki_t list 型のリストを受け取ったら，「最短距離最小の駅」と「最短距離最小の駅以外からなるリスト」の組を返す関数 *)
+(* saitan_wo_bunri : eki_t list -> eki_t * eki_t list *)
+let rec saitan_wo_bunri eki_lst =
+  match eki_lst with
+  | [] -> ({ namae = "dummy"; saitan_kyori = infinity; temae_list = [] }, [])
+  | [first] -> (first, [])
+  | first :: rest ->
+      let (m, rest_eki_lst) = saitan_wo_bunri rest in
+      if first.saitan_kyori < m.saitan_kyori then
+        (first, m :: rest_eki_lst)
+      else
+        (m, first :: rest_eki_lst)
+
+let test1_saitan_wo_bunri =
+  saitan_wo_bunri []
+  = ({ namae = "dummy"; saitan_kyori = infinity; temae_list = [] }, [])
+
+let test2_saitan_wo_bunri =
+  saitan_wo_bunri [{ namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] }]
+  = ({ namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] }, [])
+
+let test3_saitan_wo_bunri =
+  saitan_wo_bunri
+    [ { namae = "茗荷谷"; saitan_kyori = 3.0; temae_list = [] }
+    ; { namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] } ]
+  = ( { namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] }
+    , [{ namae = "茗荷谷"; saitan_kyori = 3.0; temae_list = [] }] )
+
+(* exer15.5 *)
+(* 問題 15.4 で作った関数 saitan_wo_bunri を fold_right を使って定義 *)
+(* saitan_wo_bunri : eki_t list -> eki_t * eki_t list *)
+let rec saitan_wo_bunri eki_lst =
+  match eki_lst with
+  | [] -> ({ namae = "dummy"; saitan_kyori = infinity; temae_list = [] }, [])
+  | first :: rest ->
+      List.fold_right
+        (fun eki (p, v) ->
+          if eki.saitan_kyori < p.saitan_kyori then
+            (eki, p :: v)
+          else
+            (p, eki :: v) )
+        rest (first, [])
+
+let test1_saitan_wo_bunri =
+  saitan_wo_bunri []
+  = ({ namae = "dummy"; saitan_kyori = infinity; temae_list = [] }, [])
+
+let test2_saitan_wo_bunri =
+  saitan_wo_bunri [{ namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] }]
+  = ({ namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] }, [])
+
+let test3_saitan_wo_bunri =
+  saitan_wo_bunri
+    [ { namae = "茗荷谷"; saitan_kyori = 3.0; temae_list = [] }
+    ; { namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] } ]
+  = ( { namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] }
+    , [{ namae = "茗荷谷"; saitan_kyori = 3.0; temae_list = [] }] )
