@@ -15,7 +15,7 @@ let total_distance lst =
   in
   hojo lst 0.0
 
-(* ex16.1 *)
+(* exer16.1 *)
 (* 目的：整数のリストを受け取ったら，それまでの数の合計からなるリストを返す関数 *)
 (* sum_list : int list -> int list *)
 let sum_list lst =

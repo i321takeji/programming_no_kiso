@@ -48,7 +48,7 @@ let rec e n =
   else
     d +. e (n + 1)
 
-(* ex15.2 *)
+(* exer15.2 *)
 (* 目的：ふたつの自然数 m と n の最大公約数を求める *)
 (* gcd : int -> int -> int *)
 let rec gcd m n =
@@ -68,7 +68,7 @@ let test4_gcd = gcd 13 17 = 1
 
 let test5_gcd = gcd 24 6 = 6
 
-(* ex15.3 *)
+(* exer15.3 *)
 (* 目的：2 <= n の自然数のリストを受け取ったら，2 <= n 以下の素数のリストを返す関数 *)
 (* sieve : int list -> int list *)
 let rec sieve lst =
