@@ -1616,17 +1616,28 @@ let test1_koushin =
 (* exer16.4 *)
 (* 目的： eki_t list 型の (未確定の) 駅のリストと ekikan_t list 型の駅間のリストを受け取ったら，
    ダイクストラのアルゴリズムにしたがって，各駅について最短距離と最短経路が正しく入ったリスト (eki_t list 型) を返す関数 *)
-(* jijkstra_main : eki_t list -> ekikan_t list -> eki_t list *)
-let rec jijkstra_main eki_lst ekikan_lst =
-  if ekikan_lst = [] then
+(* dijkstra_main : eki_t list -> ekikan_t list -> eki_t list *)
+let rec dijkstra_main eki_lst ekikan_lst =
+  if eki_lst = [] then
     []
   else
     let (m, other) = saitan_wo_bunri eki_lst in
     let mikakutei = koushin m other ekikan_lst in
-    m :: jijkstra_main mikakutei ekikan_lst
+    m :: dijkstra_main mikakutei ekikan_lst
+
+(* テスト *)
 
 (* exer16.5 *)
 (* 目的：始点の駅名 (ローマ字の文字列) と終点の駅名 (ローマ字の文字列) を受け取ったら，
    dijkstra 距離で最短路を求める関数 *)
 (* dijkstra : string -> string -> eki_t *)
-let dijkstra start stop = failwith "unimplemented"
+let dijkstra start_romaji stop_romaji =
+  let ekimei_lst = seiretsu global_ekimei_list in
+  let start = romaji_to_kanji start_romaji ekimei_lst in
+  let stop = romaji_to_kanji stop_romaji ekimei_lst in
+  let init_eki_lst = make_initial_eki_list global_ekimei_list start in
+  List.find
+    (fun eki -> eki.namae = stop)
+    (dijkstra_main init_eki_lst global_ekikan_list)
+
+(* テスト *)
