@@ -38,3 +38,35 @@ let test3_sum_list = sum_list [3; 2] = [3; 5]
 let test4_sum_list = sum_list [3; 2; 1] = [3; 5; 6]
 
 let test5_sum_list = sum_list [3; 2; 1; 4] = [3; 5; 6; 10]
+
+(* sec16.3 *)
+(* 目的：与えられたリストを逆順にして返す *)
+(* reverse : 'a list -> 'a list *)
+let reverse lst =
+  (* 目的：(lst の逆順リスト) @ result を返す *)
+  (* ここで result はこれまでの要素を逆順にしたリストを返す *)
+  let rec rev lst result =
+    match lst with
+    | [] -> result
+    | first :: rest -> rev rest (first :: result)
+  in
+  rev lst []
+
+(* exer16.2 *)
+(* 目的：関数 f と初期値 init，そしてリスト lst を受け取ったら，
+  init からはじめてリスト lst の要素を「左から」順に f を施し込む関数 fold_left を作る *)
+(* fold_left : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a *)
+let rec fold_left f init lst =
+  match lst with
+  | [] -> init
+  | first :: rest -> fold_left f (f init first) rest
+
+let test1 = fold_left ( + ) 0 [] = 0
+
+let test2 = fold_left ( + ) 0 [1; 2; 3] = 6
+
+let test3 = fold_left (fun acc x -> acc - x) 0 [1; 2; 3] = -6
+
+let test4 = fold_left (fun acc x -> x :: acc) [] [1; 2; 3] = [3; 2; 1]
+
+let test5 = fold_left ( ^ ) "" ["a"; "b"; "c"] = "abc"

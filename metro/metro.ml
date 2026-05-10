@@ -1469,19 +1469,20 @@ let test_make_initial_eki_list3 =
 (* koushin : eki_t -> eki_t list -> eki_t list *)
 let koushin p v =
   List.map
-    (fun p q ->
-      let pq_kyori = get_ekikan_kyori p.namae q.namae global_ekikan_list in
-      let is_connected = pq_kyori <> infinity in
-      (* お行儀よく *)
-      let new_kyori = p.saitan_kyori +. pq_kyori in
-      if is_connected && new_kyori < q.saitan_kyori then
-        { namae = q.namae
-        ; saitan_kyori = new_kyori
-        ; temae_list = q.namae :: p.temae_list
-        }
-      else
-        (* p-q が繋がっていない or 距離が小さくならない場合 *)
-        q )
+    ((fun p q ->
+       let pq_kyori = get_ekikan_kyori p.namae q.namae global_ekikan_list in
+       let is_connected = pq_kyori <> infinity in
+       (* お行儀よく *)
+       let new_kyori = p.saitan_kyori +. pq_kyori in
+       if is_connected && new_kyori < q.saitan_kyori then
+         { namae = q.namae
+         ; saitan_kyori = new_kyori
+         ; temae_list = q.namae :: p.temae_list
+         }
+       else
+         (* p-q が繋がっていない or 距離が小さくならない場合 *)
+         q )
+       p )
     v
 
 (* exer15.4 *)
@@ -1566,3 +1567,66 @@ let test_saitan_wo_bunri4 =
 
 let test_saitan_wo_bunri5 =
   saitan_wo_bunri [eki4; eki3; eki2] = (eki2, [eki3; eki4])
+
+(* exer16.3 *)
+(* 目的：問題 14.13 で作った koshin の引数をひとつ増やし，駅間リスト (ekikan_t list 型) を受け取りようにせよ．
+   さらに koushin の中で get_ekikan_kyori を使うときには，このリストを強うようにせよ *)
+let koushin p v ekikan_lst =
+  List.map
+    ((fun p q ->
+       let pq_kyori = get_ekikan_kyori p.namae q.namae ekikan_lst in
+       let is_connected = pq_kyori <> infinity in
+       (* お行儀よく *)
+       let new_kyori = p.saitan_kyori +. pq_kyori in
+       if is_connected && new_kyori < q.saitan_kyori then
+         { namae = q.namae
+         ; saitan_kyori = new_kyori
+         ; temae_list = q.namae :: p.temae_list
+         }
+       else
+         (* p-q が繋がっていない or 距離が小さくならない場合 *)
+         q )
+       p )
+    v
+
+(* テスト *)
+let test_ekikan_list =
+  [ { kiten = "A"; shuten = "B"; keiyu = "Book"; kyori = 10.0; jikan = 0 }
+  ; { kiten = "A"; shuten = "D"; keiyu = "Book"; kyori = 4.0; jikan = 0 }
+  ; { kiten = "B"; shuten = "C"; keiyu = "Book"; kyori = 2.0; jikan = 0 }
+  ; { kiten = "B"; shuten = "E"; keiyu = "Book"; kyori = 2.0; jikan = 0 }
+  ; { kiten = "C"; shuten = "E"; keiyu = "Book"; kyori = 1.0; jikan = 0 }
+  ; { kiten = "D"; shuten = "E"; keiyu = "Book"; kyori = 3.0; jikan = 0 } ]
+
+(* fig12.2 -> fig12.3 *)
+let test1_koushin =
+  let p = { namae = "A"; saitan_kyori = 0.0; temae_list = ["A"] } in
+  let v =
+    [ { namae = "B"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "C"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "D"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "E"; saitan_kyori = infinity; temae_list = [] } ]
+  in
+  koushin p v test_ekikan_list
+  = [ { namae = "B"; saitan_kyori = 10.0; temae_list = ["B"; "A"] }
+    ; { namae = "C"; saitan_kyori = infinity; temae_list = [] }
+    ; { namae = "D"; saitan_kyori = 4.0; temae_list = ["D"; "A"] }
+    ; { namae = "E"; saitan_kyori = infinity; temae_list = [] } ]
+
+(* exer16.4 *)
+(* 目的： eki_t list 型の (未確定の) 駅のリストと ekikan_t list 型の駅間のリストを受け取ったら，
+   ダイクストラのアルゴリズムにしたがって，各駅について最短距離と最短経路が正しく入ったリスト (eki_t list 型) を返す関数 *)
+(* jijkstra_main : eki_t list -> ekikan_t list -> eki_t list *)
+let rec jijkstra_main eki_lst ekikan_lst =
+  if ekikan_lst = [] then
+    []
+  else
+    let (m, other) = saitan_wo_bunri eki_lst in
+    let mikakutei = koushin m other ekikan_lst in
+    m :: jijkstra_main mikakutei ekikan_lst
+
+(* exer16.5 *)
+(* 目的：始点の駅名 (ローマ字の文字列) と終点の駅名 (ローマ字の文字列) を受け取ったら，
+   dijkstra 距離で最短路を求める関数 *)
+(* dijkstra : string -> string -> eki_t *)
+let dijkstra start stop = failwith "unimplemented"
