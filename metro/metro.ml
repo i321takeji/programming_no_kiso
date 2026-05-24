@@ -1625,8 +1625,6 @@ let rec dijkstra_main eki_lst ekikan_lst =
     let mikakutei = koushin m other ekikan_lst in
     m :: dijkstra_main mikakutei ekikan_lst
 
-(* テスト *)
-
 (* exer16.5 *)
 (* 目的：始点の駅名 (ローマ字の文字列) と終点の駅名 (ローマ字の文字列) を受け取ったら，
    dijkstra 距離で最短路を求める関数 *)
@@ -1635,9 +1633,17 @@ let dijkstra start_romaji stop_romaji =
   let ekimei_lst = seiretsu global_ekimei_list in
   let start = romaji_to_kanji start_romaji ekimei_lst in
   let stop = romaji_to_kanji stop_romaji ekimei_lst in
-  let init_eki_lst = make_initial_eki_list global_ekimei_list start in
+  (* let init_eki_lst = make_initial_eki_list global_ekimei_list start in *)
+  let init_eki_lst = make_initial_eki_list ekimei_lst start in
   List.find
     (fun eki -> eki.namae = stop)
     (dijkstra_main init_eki_lst global_ekikan_list)
 
 (* テスト *)
+let test_dijkstra =
+  dijkstra "shinjuku" "shibuya"
+  = { namae = "渋谷"
+    ; saitan_kyori = 8.20000000000000107
+    ; temae_list =
+        ["渋谷"; "表参道"; "青山一丁目"; "赤坂見附"; "四ツ谷"; "四谷三丁目"; "新宿御苑前"; "新宿三丁目"; "新宿"]
+    }
