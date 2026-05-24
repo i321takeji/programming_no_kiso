@@ -36,13 +36,22 @@ let nenrei birth_nengou current_nengou =
   current_seireki - birth_seireki
 
 (* テスト *)
-let nenrei_test1 = nenrei (Meiji 40) (Heisei 30) = 111
+(* ex17.1 *)
+let nenrei_test1 = nenrei (Showa 63) (Heisei 1) = 1
 
-let nenrei_test2 = nenrei (Taisho 10) (Heisei 30) = 97
+let nenrei_test2 = nenrei (Heisei 1) (Heisei 1) = 0
 
-let nenrei_test3 = nenrei (Showa 50) (Heisei 30) = 43
+let nenrei_test3 = nenrei (Meiji 45) (Taisho 1) = 0
 
-let nenrei_test4 = nenrei (Heisei 30) (Heisei 30) = 0
+let nenrei_test4 = nenrei (Taisho 15) (Showa 1) = 0
+
+let nenrei_test5 = nenrei (Meiji 40) (Heisei 30) = 111
+
+let nenrei_test6 = nenrei (Taisho 10) (Heisei 30) = 97
+
+let nenrei_test7 = nenrei (Showa 50) (Heisei 30) = 43
+
+let nenrei_test8 = nenrei (Heisei 30) (Heisei 30) = 0
 
 (* exer17.2 *)
 (* 目的：1 月から 12 月までを表す構成子 January, ..., December を持つ型 year_t を宣言．
