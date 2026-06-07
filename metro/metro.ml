@@ -1688,26 +1688,31 @@ let test_assoc4 = assoc "池袋" [("茗荷谷", 1.2); ("後楽園", 1.8)] = infi
 let rec insert_eki ekikan_tree ekimei eki_kyori =
   match ekikan_tree with
   | Empty -> Node (Empty, ekimei, [eki_kyori], Empty)
-  | Node (t1, ekimei', eki_kyori', t2) as t ->
+  | Node (t1, ekimei', eki_kyori_lst, t2) as t ->
       if ekimei = ekimei' then
-        t
+        if assoc (fst eki_kyori) eki_kyori_lst = infinity then
+          Node (t1, ekimei', eki_kyori :: eki_kyori_lst, t2)
+        else
+          t
       else if ekimei < ekimei' then
-        Node (insert_eki t1 ekimei eki_kyori, ekimei', eki_kyori', t2)
+        Node (insert_eki t1 ekimei eki_kyori, ekimei', eki_kyori_lst, t2)
       else
-        Node (t1, ekimei', eki_kyori', insert_eki t2 ekimei eki_kyori)
+        Node (t1, ekimei', eki_kyori_lst, insert_eki t2 ekimei eki_kyori)
 
 (* 目的：ekikan_tree_t 型の木と ekikan_t 型の駅名を受け取ったら，その情報を挿入した木を返す関数 *)
 (* insert_ekikan : ekikan_tree_t -> ekikan_t -> ekikan_tree_t *)
 let insert_ekikan ekikan_tree ekikan =
-  let inserted_shiten =
+  let inserted_kiten =
     insert_eki ekikan_tree ekikan.kiten (ekikan.shuten, ekikan.kyori)
   in
-  insert_eki inserted_shiten ekikan.shuten (ekikan.kiten, ekikan.kyori)
+  insert_eki inserted_kiten ekikan.shuten (ekikan.kiten, ekikan.kyori)
 
 (* テスト *)
+let book_ekikan =
+  { kiten = "新大塚"; shuten = "茗荷谷"; keiyu = "丸ノ内線"; kyori = 1.2; jikan = 2 }
+
 let test_insert_ekikan1 =
-  insert_ekikan Empty
-    { kiten = "新大塚"; shuten = "茗荷谷"; keiyu = "丸ノ内線"; kyori = 1.2; jikan = 2 }
+  insert_ekikan Empty book_ekikan
   = Node
       ( Empty
       , "新大塚"
@@ -1721,7 +1726,7 @@ let test_insert_ekikan2 =
        , "新大塚"
        , [("茗荷谷", 1.2)]
        , Node (Empty, "茗荷谷", [("新大塚", 1.2)], Empty) ) )
-    { kiten = "新大塚"; shuten = "茗荷谷"; keiyu = "丸ノ内線"; kyori = 1.2; jikan = 2 }
+    book_ekikan
   = Node
       ( Empty
       , "新大塚"
@@ -1729,9 +1734,7 @@ let test_insert_ekikan2 =
       , Node (Empty, "茗荷谷", [("新大塚", 1.2)], Empty) )
 
 let test_insert_ekikan3 =
-  insert_ekikan
-    (Node (Empty, "新大塚", [("茗荷谷", 1.2)], Empty))
-    { kiten = "新大塚"; shuten = "茗荷谷"; keiyu = "丸ノ内線"; kyori = 1.2; jikan = 2 }
+  insert_ekikan (Node (Empty, "新大塚", [("茗荷谷", 1.2)], Empty)) book_ekikan
   = Node
       ( Empty
       , "新大塚"
@@ -1739,11 +1742,44 @@ let test_insert_ekikan3 =
       , Node (Empty, "茗荷谷", [("新大塚", 1.2)], Empty) )
 
 let test_insert_ekikan4 =
-  insert_ekikan
-    (Node (Empty, "茗荷谷", [("新大塚", 1.2)], Empty))
-    { kiten = "新大塚"; shuten = "茗荷谷"; keiyu = "丸ノ内線"; kyori = 1.2; jikan = 2 }
+  insert_ekikan (Node (Empty, "茗荷谷", [("新大塚", 1.2)], Empty)) book_ekikan
   = Node
       ( Node (Empty, "新大塚", [("茗荷谷", 1.2)], Empty)
       , "茗荷谷"
       , [("新大塚", 1.2)]
       , Empty )
+
+(* テスト : ex17.12 *)
+let ekikan_ab =
+  { kiten = "B"; shuten = "A"; keiyu = "test"; kyori = 1.2; jikan = 2 }
+
+let ekikan_bc =
+  { kiten = "B"; shuten = "C"; keiyu = "test"; kyori = 2.3; jikan = 3 }
+
+let tree_ab =
+  Node (Node (Empty, "A", [("B", 1.2)], Empty), "B", [("A", 1.2)], Empty)
+
+let tree_abc =
+  Node
+    ( Node (Empty, "A", [("B", 1.2)], Empty)
+    , "B"
+    , [("C", 2.3); ("A", 1.2)]
+    , Node (Empty, "C", [("B", 2.3)], Empty) )
+
+let tree_bc =
+  Node (Empty, "B", [("C", 2.3)], Node (Empty, "C", [("B", 2.3)], Empty))
+
+let tree_bca =
+  Node
+    ( Node (Empty, "A", [("B", 1.2)], Empty)
+    , "B"
+    , [("A", 1.2); ("C", 2.3)]
+    , Node (Empty, "C", [("B", 2.3)], Empty) )
+
+let test_insert_ekikan5 = insert_ekikan Empty ekikan_ab = tree_ab
+
+let test_insert_ekikan6 = insert_ekikan tree_ab ekikan_bc = tree_abc
+
+let test_insert_ekikan7 = insert_ekikan Empty ekikan_bc = tree_bc
+
+let test_insert_ekikan8 = insert_ekikan tree_bc ekikan_ab = tree_bca
