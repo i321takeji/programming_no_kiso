@@ -1647,3 +1647,103 @@ let test_dijkstra =
     ; temae_list =
         ["渋谷"; "表参道"; "青山一丁目"; "赤坂見附"; "四ツ谷"; "四谷三丁目"; "新宿御苑前"; "新宿三丁目"; "新宿"]
     }
+
+(* exer17.10 *)
+
+(** 目的：木の節に，
+ * - (漢字の) 駅名
+ * - 「『その駅に直接つながっている駅名 (漢字)』と『その駅までの距離』の組」のリスト
+ * を持つ木の型 ekikan_tree_t
+ *)
+type ekikan_tree_t =
+  | Empty
+  (* 空の木 *)
+  | Node of ekikan_tree_t * string * (string * float) list * ekikan_tree_t
+(* 節 *)
+
+(* exer17.11 *)
+(* 目的：「駅名」と「駅名と距離の組のリスト」を受け取ったら，その駅までの距離を返す関数 *)
+(* assoc : string -> (string * float) list -> float *)
+let rec assoc ekimei ekikan_lst =
+  match ekikan_lst with
+  | [] -> infinity
+  | (connected_eki, kyori) :: rest ->
+      if ekimei = connected_eki then
+        kyori
+      else
+        assoc ekimei rest
+
+(* テスト *)
+let test_assoc1 = assoc "茗荷谷" [] = infinity
+
+let test_assoc2 = assoc "茗荷谷" [("茗荷谷", 1.2)] = 1.2
+
+let test_assoc3 =
+  assoc "後楽園" [("茗荷谷", 1.2); ("後楽園", 1.8); ("本郷三丁目", 0.8)] = 1.8
+
+let test_assoc4 = assoc "池袋" [("茗荷谷", 1.2); ("後楽園", 1.8)] = infinity
+
+(* exer17.12 *)
+
+let rec insert_eki ekikan_tree ekimei eki_kyori =
+  match ekikan_tree with
+  | Empty -> Node (Empty, ekimei, [eki_kyori], Empty)
+  | Node (t1, ekimei', eki_kyori', t2) as t ->
+      if ekimei = ekimei' then
+        t
+      else if ekimei < ekimei' then
+        Node (insert_eki t1 ekimei eki_kyori, ekimei', eki_kyori', t2)
+      else
+        Node (t1, ekimei', eki_kyori', insert_eki t2 ekimei eki_kyori)
+
+(* 目的：ekikan_tree_t 型の木と ekikan_t 型の駅名を受け取ったら，その情報を挿入した木を返す関数 *)
+(* insert_ekikan : ekikan_tree_t -> ekikan_t -> ekikan_tree_t *)
+let insert_ekikan ekikan_tree ekikan =
+  let inserted_shiten =
+    insert_eki ekikan_tree ekikan.kiten (ekikan.shuten, ekikan.kyori)
+  in
+  insert_eki inserted_shiten ekikan.shuten (ekikan.kiten, ekikan.kyori)
+
+(* テスト *)
+let test_insert_ekikan1 =
+  insert_ekikan Empty
+    { kiten = "新大塚"; shuten = "茗荷谷"; keiyu = "丸ノ内線"; kyori = 1.2; jikan = 2 }
+  = Node
+      ( Empty
+      , "新大塚"
+      , [("茗荷谷", 1.2)]
+      , Node (Empty, "茗荷谷", [("新大塚", 1.2)], Empty) )
+
+let test_insert_ekikan2 =
+  insert_ekikan
+    (Node
+       ( Empty
+       , "新大塚"
+       , [("茗荷谷", 1.2)]
+       , Node (Empty, "茗荷谷", [("新大塚", 1.2)], Empty) ) )
+    { kiten = "新大塚"; shuten = "茗荷谷"; keiyu = "丸ノ内線"; kyori = 1.2; jikan = 2 }
+  = Node
+      ( Empty
+      , "新大塚"
+      , [("茗荷谷", 1.2)]
+      , Node (Empty, "茗荷谷", [("新大塚", 1.2)], Empty) )
+
+let test_insert_ekikan3 =
+  insert_ekikan
+    (Node (Empty, "新大塚", [("茗荷谷", 1.2)], Empty))
+    { kiten = "新大塚"; shuten = "茗荷谷"; keiyu = "丸ノ内線"; kyori = 1.2; jikan = 2 }
+  = Node
+      ( Empty
+      , "新大塚"
+      , [("茗荷谷", 1.2)]
+      , Node (Empty, "茗荷谷", [("新大塚", 1.2)], Empty) )
+
+let test_insert_ekikan4 =
+  insert_ekikan
+    (Node (Empty, "茗荷谷", [("新大塚", 1.2)], Empty))
+    { kiten = "新大塚"; shuten = "茗荷谷"; keiyu = "丸ノ内線"; kyori = 1.2; jikan = 2 }
+  = Node
+      ( Node (Empty, "新大塚", [("茗荷谷", 1.2)], Empty)
+      , "茗荷谷"
+      , [("新大塚", 1.2)]
+      , Empty )
