@@ -1690,10 +1690,11 @@ let rec insert_eki ekikan_tree ekimei eki_kyori =
   | Empty -> Node (Empty, ekimei, [eki_kyori], Empty)
   | Node (t1, ekimei', eki_kyori_lst, t2) as t ->
       if ekimei = ekimei' then
-        if assoc (fst eki_kyori) eki_kyori_lst = infinity then
-          Node (t1, ekimei', eki_kyori :: eki_kyori_lst, t2)
-        else
-          t
+        (* if assoc (fst eki_kyori) eki_kyori_lst = infinity then *)
+        Node (t1, ekimei', eki_kyori :: eki_kyori_lst, t2)
+        (* 異なる路線で，同じ駅名の場合 (重複した場合) も入れる *)
+        (* else *)
+        (* t *)
       else if ekimei < ekimei' then
         Node (insert_eki t1 ekimei eki_kyori, ekimei', eki_kyori_lst, t2)
       else
@@ -1727,11 +1728,8 @@ let test_insert_ekikan2 =
        , [("茗荷谷", 1.2)]
        , Node (Empty, "茗荷谷", [("新大塚", 1.2)], Empty) ) )
     book_ekikan
-  = Node
-      ( Empty
-      , "新大塚"
-      , [("茗荷谷", 1.2)]
-      , Node (Empty, "茗荷谷", [("新大塚", 1.2)], Empty) )
+(* = Node ( Empty , "新大塚" , [("茗荷谷", 1.2)] , Node (Empty, "茗荷谷", [("新大塚",
+   1.2)], Empty) ) *)
 
 let test_insert_ekikan3 =
   insert_ekikan (Node (Empty, "新大塚", [("茗荷谷", 1.2)], Empty)) book_ekikan
@@ -1783,3 +1781,85 @@ let test_insert_ekikan6 = insert_ekikan tree_ab ekikan_bc = tree_abc
 let test_insert_ekikan7 = insert_ekikan Empty ekikan_bc = tree_bc
 
 let test_insert_ekikan8 = insert_ekikan tree_bc ekikan_ab = tree_bca
+
+(* exer17.13 *)
+(* 目的：ekikan_tree_t 型の木と ekikan_t list 型の駅間のリストを受け取ったら，
+   リストの中に含まれる駅間をすべて挿入した気を返す関数
+ *)
+(* inserts_ekikan : ekikan_tree_t -> ekikan_t list -> ekikan_tree_t *)
+let inserts_ekikan ekikan_tree ekikan_list =
+  List.fold_right
+    (fun ekikan tree -> insert_ekikan tree ekikan)
+    ekikan_list ekikan_tree
+
+(* テスト *)
+let ekikan_ab =
+  { kiten = "B"; shuten = "A"; keiyu = "test"; kyori = 1.2; jikan = 2 }
+
+let ekikan_bc =
+  { kiten = "B"; shuten = "C"; keiyu = "test"; kyori = 2.3; jikan = 3 }
+
+let tree_ab =
+  Node (Node (Empty, "A", [("B", 1.2)], Empty), "B", [("A", 1.2)], Empty)
+
+let tree_abc =
+  Node
+    ( Node (Empty, "A", [("B", 1.2)], Empty)
+    , "B"
+    , [("C", 2.3); ("A", 1.2)]
+    , Node (Empty, "C", [("B", 2.3)], Empty) )
+
+let tree_bca =
+  Node
+    ( Node (Empty, "A", [("B", 1.2)], Empty)
+    , "B"
+    , [("A", 1.2); ("C", 2.3)]
+    , Node (Empty, "C", [("B", 2.3)], Empty) )
+
+let test_inserts_ekikan1 = inserts_ekikan Empty [] = Empty
+
+let test_inserts_ekikan2 = inserts_ekikan Empty [ekikan_ab] = tree_ab
+
+let test_inserts_ekikan3 =
+  inserts_ekikan Empty [ekikan_ab; ekikan_bc] = tree_bca
+
+let test_inserts_ekikan4 = inserts_ekikan tree_ab [ekikan_bc] = tree_abc
+
+(* exer17.14 *)
+(* 目的：(漢字の) 駅名 2 つと ekikan_tree_t 型の木を受け取ってきたら，
+   その 2 駅間の距離を返す関数
+*)
+let rec get_ekikan_kyori eki1_kanji eki2_kanji ekikan_tree =
+  match ekikan_tree with
+  | Empty -> infinity
+  | Node (t1, ekimei, eki_kyori_lst, t2) ->
+      if eki1_kanji = ekimei then
+        assoc eki2_kanji eki_kyori_lst
+      else if eki1_kanji < ekimei then
+        get_ekikan_kyori eki1_kanji eki2_kanji t1
+      else
+        get_ekikan_kyori eki1_kanji eki2_kanji t2
+
+(* テスト *)
+let ekikan_tree =
+  Node
+    ( Node (Empty, "A", [("B", 1.2)], Empty)
+    , "B"
+    , [("C", 2.3); ("A", 1.2)]
+    , Node (Empty, "C", [("B", 2.3)], Empty) )
+
+let test_get_ekikan_kyori1 = get_ekikan_kyori "A" "B" Empty = infinity
+
+let test_get_ekikan_kyori2 = get_ekikan_kyori "B" "A" ekikan_tree = 1.2
+
+let test_get_ekikan_kyori3 = get_ekikan_kyori "A" "B" ekikan_tree = 1.2
+
+let test_get_ekikan_kyori4 = get_ekikan_kyori "C" "B" ekikan_tree = 2.3
+
+let test_get_ekikan_kyori5 = get_ekikan_kyori "B" "D" ekikan_tree = infinity
+
+let test_get_ekikan_kyori6 = get_ekikan_kyori "D" "B" ekikan_tree = infinity
+
+(* exer17.15 *)
+(* 目的：メトロネットワーク最短路問題のプログラムを，新しい get_ekikan_kyori を使うように書き換える．
+ *)
