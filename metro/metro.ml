@@ -1907,3 +1907,29 @@ let test_dikstra_tree start stop =
 let test_dikstra_tree1 = test_dikstra_tree "shinjuku" "meguro"
 
 let test_dikstra_tree2 = test_dikstra_tree "akasaka" "tokyo"
+
+(* exer17.16 *)
+(* 目的：saitan_wo_bunri を最短距離最小の駅の候補 (dijkstra_main の first) と
+   そのほかの空かも知れない駅のリスト (rest) を別々に取るように変更 *)
+(* saitan_wo_bunri : eki_t -> eki_t list -> eki_t * eki_t list *)
+let rec saitan_wo_bunri eki eki_list =
+  List.fold_right
+    (fun eki (p, v) ->
+      if eki.saitan_kyori < p.saitan_kyori then
+        (eki, p :: v)
+      else
+        (p, eki :: v) )
+    eki_list (eki, [])
+
+let test1_saitan_wo_bunri =
+  saitan_wo_bunri
+    { namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] }
+    []
+  = ({ namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] }, [])
+
+let test2_saitan_wo_bunri =
+  saitan_wo_bunri
+    { namae = "茗荷谷"; saitan_kyori = 3.0; temae_list = [] }
+    [{ namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] }]
+  = ( { namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] }
+    , [{ namae = "茗荷谷"; saitan_kyori = 3.0; temae_list = [] }] )

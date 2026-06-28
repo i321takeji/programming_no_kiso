@@ -419,3 +419,30 @@ let test5 =
   insert_tree tree5 4
   = Node
       (Node (Leaf 1, 2, Node (Empty, 3, Leaf 4)), 6, Node (Empty, 7, Leaf 9))
+
+(* exer17.17 *)
+(* 目的：10.2 節の minimum を，最小値の候補とそのほかの空かも知れないリスト (rest) を別々に取るように変更 *)
+(* minimum : int list -> int *)
+let minimum lst =
+  let rec minimum_sub v lst =
+    match lst with
+    | [] -> v
+    | first :: rest ->
+        let c = minimum_sub first rest in
+        if v < c then
+          v
+        else
+          c
+  in
+  match lst with
+  | [] -> max_int
+  | first :: rest -> minimum_sub first rest
+
+(* テスト *)
+let test1_minimum = minimum [3] = 3
+
+let test2_minimum = minimum [1; 2] = 1
+
+let test3_minimum = minimum [3; 2] = 2
+
+let test4_minimum = minimum [3; 2; 6; 4; 1; 8] = 1
