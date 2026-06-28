@@ -1829,7 +1829,8 @@ let test_inserts_ekikan4 = inserts_ekikan tree_ab [ekikan_bc] = tree_abc
 (* 目的：(漢字の) 駅名 2 つと ekikan_tree_t 型の木を受け取ってきたら，
    その 2 駅間の距離を返す関数
 *)
-let rec get_ekikan_kyori eki1_kanji eki2_kanji ekikan_tree =
+let rec get_ekikan_kyori eki1_kanji eki2_kanji (ekikan_tree : ekikan_tree_t)
+    =
   match ekikan_tree with
   | Empty -> infinity
   | Node (t1, ekimei, eki_kyori_lst, t2) ->
@@ -1861,5 +1862,48 @@ let test_get_ekikan_kyori5 = get_ekikan_kyori "B" "D" ekikan_tree = infinity
 let test_get_ekikan_kyori6 = get_ekikan_kyori "D" "B" ekikan_tree = infinity
 
 (* exer17.15 *)
-(* 目的：メトロネットワーク最短路問題のプログラムを，新しい get_ekikan_kyori を使うように書き換える．
- *)
+(* 目的：メトロネットワーク最短路問題のプログラムを，新しい get_ekikan_kyori を使うように書き換える． *)
+(* 実装は koushin と同じ *)
+let koushin_tree p v (ekikan_tree : ekikan_tree_t) =
+  List.map
+    ((fun p q ->
+       let pq_kyori = get_ekikan_kyori p.namae q.namae ekikan_tree in
+       let is_connected = pq_kyori <> infinity in
+       (* お行儀よく *)
+       let new_kyori = p.saitan_kyori +. pq_kyori in
+       if is_connected && new_kyori < q.saitan_kyori then
+         { namae = q.namae
+         ; saitan_kyori = new_kyori
+         ; temae_list = q.namae :: p.temae_list
+         }
+       else
+         (* p-q が繋がっていない or 距離が小さくならない場合 *)
+         q )
+       p )
+    v
+
+let rec dijkstra_main_tree eki_lst (ekikan_tree : ekikan_tree_t) =
+  if eki_lst = [] then
+    []
+  else
+    let (m, other) = saitan_wo_bunri eki_lst in
+    let mikakutei = koushin_tree m other ekikan_tree in
+    m :: dijkstra_main_tree mikakutei ekikan_tree
+
+(* dijkstra : string -> string -> eki_t *)
+let dijkstra_tree start_romaji stop_romaji =
+  let ekimei_lst = seiretsu global_ekimei_list in
+  let start = romaji_to_kanji start_romaji ekimei_lst in
+  let stop = romaji_to_kanji stop_romaji ekimei_lst in
+  let init_eki_lst = make_initial_eki_list ekimei_lst start in
+  let global_ekikan_tree = inserts_ekikan Empty global_ekikan_list in
+  List.find
+    (fun eki -> eki.namae = stop)
+    (dijkstra_main_tree init_eki_lst global_ekikan_tree)
+
+let test_dikstra_tree start stop =
+  dijkstra start stop = dijkstra_tree start stop
+
+let test_dikstra_tree1 = test_dikstra_tree "shinjuku" "meguro"
+
+let test_dikstra_tree2 = test_dikstra_tree "akasaka" "tokyo"
