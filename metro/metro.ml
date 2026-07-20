@@ -1007,7 +1007,8 @@ let test_romaji_to_kanji6 = romaji_to_kanji "ueno" [] = ""
 (* get_ekikan_kyori : string -> string -> ekikan_t list -> float *)
 let rec get_ekikan_kyori eki1_kanji eki2_kanji ekikan_lst =
   match ekikan_lst with
-  | [] -> infinity
+  (* | [] -> infinity *)
+  | [] -> raise Not_found (* ex18.4 *)
   | { kiten; shuten; kyori } :: rest ->
       if
         (eki1_kanji = kiten && eki2_kanji = shuten)
@@ -1574,18 +1575,25 @@ let test_saitan_wo_bunri5 =
 let koushin p v ekikan_lst =
   List.map
     ((fun p q ->
-       let pq_kyori = get_ekikan_kyori p.namae q.namae ekikan_lst in
-       let is_connected = pq_kyori <> infinity in
-       (* お行儀よく *)
-       let new_kyori = p.saitan_kyori +. pq_kyori in
-       if is_connected && new_kyori < q.saitan_kyori then
-         { namae = q.namae
-         ; saitan_kyori = new_kyori
-         ; temae_list = q.namae :: p.temae_list
-         }
-       else
-         (* p-q が繋がっていない or 距離が小さくならない場合 *)
-         q )
+       try
+         let pq_kyori = get_ekikan_kyori p.namae q.namae ekikan_lst in
+         (* let is_connected = pq_kyori <> infinity in *)
+         (* ex18.5 *)
+         (* お行儀よく *)
+         let new_kyori = p.saitan_kyori +. pq_kyori in
+         if
+           (* is_connected && *)
+           new_kyori < q.saitan_kyori
+         then
+           { namae = q.namae
+           ; saitan_kyori = new_kyori
+           ; temae_list = q.namae :: p.temae_list
+           }
+         else
+           (* p-q が繋がっていない or 距離が小さくならない場合 *)
+           q
+       with
+       | Not_found -> q )
        p )
     v
 
@@ -1832,7 +1840,8 @@ let test_inserts_ekikan4 = inserts_ekikan tree_ab [ekikan_bc] = tree_abc
 let rec get_ekikan_kyori eki1_kanji eki2_kanji (ekikan_tree : ekikan_tree_t)
     =
   match ekikan_tree with
-  | Empty -> infinity
+  (* | Empty -> infinity *)
+  | Empty -> raise Not_found (* ex18.4 *)
   | Node (t1, ekimei, eki_kyori_lst, t2) ->
       if eki1_kanji = ekimei then
         assoc eki2_kanji eki_kyori_lst
@@ -1933,3 +1942,18 @@ let test2_saitan_wo_bunri =
     [{ namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] }]
   = ( { namae = "新宿"; saitan_kyori = 0.0; temae_list = ["新宿"] }
     , [{ namae = "茗荷谷"; saitan_kyori = 3.0; temae_list = [] }] )
+
+(* ex18.6 *)
+exception No_such_station of string
+
+(* ex18.7 *)
+(* 目的：ローマ字の駅名と駅名リストを受け取り，その駅の漢字表記を文字列で返す *)
+(* romaji_to_kanji : string -> ekimei_t list -> string *)
+let rec romaji_to_kanji eki_romaji ekimei_lst =
+  match ekimei_lst with
+  | [] -> raise (No_such_station eki_romaji)
+  | { romaji; kanji } :: rest ->
+      if eki_romaji = romaji then
+        kanji
+      else
+        romaji_to_kanji eki_romaji rest
