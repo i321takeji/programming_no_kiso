@@ -12,7 +12,8 @@ wrap-comments = true
 line-endings = lf
 parens-tuple = always
 parens-tuple-patterns = always
-
+# indicate-nested-or-patterns={unsafe-no|space}
+indicate-nested-or-patterns=unsafe-no
 # To make ocaml-ci happy
 version = ignore
 version-check = false
