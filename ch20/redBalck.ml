@@ -148,8 +148,8 @@ let rec insert rb_tree k v =
   | Empty -> assert false
   | Node (left, key, value, _, right) -> Node (left, key, value, Black, right)
 
-(* テスト:FIXME *)
-let insert_empty_tree = Node (Empty, 1, "a", Red, Empty)
+(* テスト *)
+let insert_empty_tree = Node (Empty, 1, "a", Black, Empty)
 
 let insert_black_tree = Node (Empty, 1, "a", Black, Empty)
 
@@ -158,6 +158,14 @@ let insert_left_tree =
 
 let insert_right_tree =
   Node (Empty, 1, "a", Black, Node (Empty, 2, "b", Red, Empty))
+
+let insert_balanced_tree =
+  Node
+    ( Node (Empty, 1, "a", Black, Empty)
+    , 2
+    , "b"
+    , Black
+    , Node (Empty, 3, "c", Black, Empty) )
 
 let insert_left_left_tree =
   Node (Node (Empty, 2, "b", Red, Empty), 3, "c", Black, Empty)
@@ -180,14 +188,14 @@ let insert_test3 = insert insert_black_tree 0 "z" = insert_left_tree
 
 let insert_test4 = insert insert_black_tree 2 "b" = insert_right_tree
 
-let insert_test5 = insert insert_left_left_tree 1 "a" = balanced_tree
+let insert_test5 = insert insert_left_left_tree 1 "a" = insert_balanced_tree
 
-let insert_test6 = insert insert_left_right_tree 2 "b" = balanced_tree
+let insert_test6 = insert insert_left_right_tree 2 "b" = insert_balanced_tree
 
-let insert_test7 = insert insert_right_left_tree 2 "b" = balanced_tree
+let insert_test7 = insert insert_right_left_tree 2 "b" = insert_balanced_tree
 
-let insert_test8 = insert insert_right_right_tree 3 "c" = balanced_tree
-
+let insert_test8 =
+  insert insert_right_right_tree 3 "c" = insert_balanced_tree
 (* set20.5 *)
 
 (* 空の赤黒木 *)
