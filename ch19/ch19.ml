@@ -72,3 +72,17 @@ module type Tree_t = sig
 end
 
 module NewTree : Tree_t = Tree
+
+(* exer19.1*)
+let rec assoc ekimei ekikan_lst =
+  match ekikan_lst with
+  | [] -> infinity
+  | (connected_eki, kyori) :: rest ->
+      if ekimei = connected_eki then
+        kyori
+      else
+        assoc ekimei rest
+
+let rec get_ekikan_kyori (eki1_kanji : string) (eki2_kanji : string)
+    ekikan_tree =
+  assoc eki2_kanji (Tree.search ekikan_tree eki1_kanji)
