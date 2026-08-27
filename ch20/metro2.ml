@@ -1117,23 +1117,28 @@ let koushin_tree p v
     (ekikan_tree : (string, (string * float) list) RedBlack.t) =
   List.map
     ((fun p q ->
-       let pq_kyori = get_ekikan_kyori p.namae q.namae ekikan_tree in
-       let is_connected = pq_kyori <> infinity in
-       (* お行儀よく *)
-       let new_kyori = p.saitan_kyori +. pq_kyori in
-       if is_connected && new_kyori < q.saitan_kyori then
-         { namae = q.namae
-         ; saitan_kyori = new_kyori
-         ; temae_list = q.namae :: p.temae_list
-         }
-       else
-         (* p-q が繋がっていない or 距離が小さくならない場合 *)
-         q )
+       try
+         let pq_kyori = get_ekikan_kyori p.namae q.namae ekikan_tree in
+         let new_kyori = p.saitan_kyori +. pq_kyori in
+         if new_kyori < q.saitan_kyori then
+           { namae = q.namae
+           ; saitan_kyori = new_kyori
+           ; temae_list = q.namae :: p.temae_list
+           }
+         else
+           (* 距離が小さくならない場合 *)
+           q
+       with
+       (* p-q が繋がっていない *)
+       | Not_found -> q )
        p )
     v
 
 let rec insert_eki ekikan_tree ekimei eki_kyori =
-  let eki_kyori_lst = RedBlack.search ekikan_tree ekimei in
+  let eki_kyori_lst =
+    try RedBlack.search ekikan_tree ekimei with
+    | Not_found -> []
+  in
   RedBlack.insert ekikan_tree ekimei (eki_kyori :: eki_kyori_lst)
 
 let insert_ekikan ekikan_tree ekikan =
