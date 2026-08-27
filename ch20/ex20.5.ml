@@ -1,3 +1,4 @@
+(* XXX: 本当は redBlack.ml から読み込みたい => dune *)
 module type Tree_t = sig
   (* sec19.3 の二分探索木を表すモジュールと同じ *)
   type ('a, 'b) t

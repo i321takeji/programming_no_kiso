@@ -1194,3 +1194,20 @@ let dijkstra_tree start_romaji stop_romaji =
   List.find
     (fun eki -> eki.namae = stop)
     (dijkstra_main_tree init_eki_lst global_ekikan_tree)
+
+(* exer21.1 *)
+(* 目的：eki_t 型のレコードを受け取ったら，結果をきれいに表示する関数 print_eki *)
+(* print_eki : eki_t -> unit *)
+let print_eki eki =
+  let path_str =
+    List.fold_right
+      (fun eki path ->
+        if path = "" then
+          eki
+        else
+          eki ^ " -> " ^ path )
+      (List.rev eki.temae_list) ""
+  in
+  print_string path_str ; print_newline ()
+
+let test_print_eki = print_eki (dijkstra_tree "shinjuku" "shibuya")
