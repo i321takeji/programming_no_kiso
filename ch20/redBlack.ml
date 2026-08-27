@@ -5,17 +5,17 @@ type color_t = Red | Black
 
 (* exer20.1 *)
 
-type ('a, 'b) rb_tree_t =
+type ('a, 'b) t =
   | Empty
   | Node of
-      ('a, 'b) rb_tree_t
+      ('a, 'b) t
       * (* キー*)
       'a
       * (* 値 *)
       'b
       * (* 色 *)
         color_t
-      * ('a, 'b) rb_tree_t
+      * ('a, 'b) t
 
 (* exer20.2 *)
 (* 目的：rb_tree_t 型の木を受け取ったら，その木が現在の頂点が黒で，子と孫が赤であるかを調べ，
