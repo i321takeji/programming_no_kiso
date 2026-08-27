@@ -82,6 +82,8 @@ module RedBlack : Tree_t = struct
           search right k
 end
 
+open RedBlack
+
 (* exer 8.5 *)
 (* 駅名の情報を格納するレコード型 *)
 type ekimei_t =
@@ -1122,7 +1124,7 @@ let rec assoc key assoc_lst =
 
 let rec get_ekikan_kyori (eki1_kanji : string) (eki2_kanji : string)
     ekikan_tree =
-  assoc eki2_kanji (RedBlack.search ekikan_tree eki1_kanji)
+  assoc eki2_kanji (search ekikan_tree eki1_kanji)
 
 let rec saitan_wo_bunri eki eki_list =
   List.fold_right
@@ -1133,8 +1135,7 @@ let rec saitan_wo_bunri eki eki_list =
         (p, eki :: v) )
     eki_list (eki, [])
 
-let koushin_tree p v
-    (ekikan_tree : (string, (string * float) list) RedBlack.t) =
+let koushin_tree p v (ekikan_tree : (string, (string * float) list) t) =
   List.map
     ((fun p q ->
        try
@@ -1156,10 +1157,10 @@ let koushin_tree p v
 
 let rec insert_eki ekikan_tree ekimei eki_kyori =
   let eki_kyori_lst =
-    try RedBlack.search ekikan_tree ekimei with
+    try search ekikan_tree ekimei with
     | Not_found -> []
   in
-  RedBlack.insert ekikan_tree ekimei (eki_kyori :: eki_kyori_lst)
+  insert ekikan_tree ekimei (eki_kyori :: eki_kyori_lst)
 
 let insert_ekikan ekikan_tree ekikan =
   let inserted_kiten =
@@ -1174,7 +1175,7 @@ let inserts_ekikan ekikan_tree ekikan_list =
     ekikan_list ekikan_tree
 
 let rec dijkstra_main_tree eki_lst
-    (ekikan_tree : (string, (string * float) list) RedBlack.t) =
+    (ekikan_tree : (string, (string * float) list) t) =
   match eki_lst with
   | [] -> []
   | first :: rest ->
@@ -1188,9 +1189,7 @@ let dijkstra_tree start_romaji stop_romaji =
   let start = romaji_to_kanji start_romaji ekimei_lst in
   let stop = romaji_to_kanji stop_romaji ekimei_lst in
   let init_eki_lst = make_initial_eki_list ekimei_lst start in
-  let global_ekikan_tree =
-    inserts_ekikan RedBlack.empty global_ekikan_list
-  in
+  let global_ekikan_tree = inserts_ekikan empty global_ekikan_list in
   List.find
     (fun eki -> eki.namae = stop)
     (dijkstra_main_tree init_eki_lst global_ekikan_tree)
