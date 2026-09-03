@@ -1155,7 +1155,7 @@ let koushin_tree p v
        p )
     v
 
-let rec insert_eki ekikan_tree ekimei eki_kyori =
+let insert_eki ekikan_tree ekimei eki_kyori =
   let eki_kyori_lst =
     try RedBlack.search ekikan_tree ekimei with
     | Not_found -> []
